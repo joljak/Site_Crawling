@@ -219,6 +219,9 @@ Pipfile
 .spyderproject
 .spyproject
 
+# csv
+*.csv
+
 # Rope project settings
 .ropeproject
 
