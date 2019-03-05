@@ -1,11 +1,11 @@
 from requests_html import HTMLSession
+from lxml.etree import ParserError
 
 group = ['community', 'allinfo', 'allreview', 'allsell']
 link_list = []
 session = HTMLSession(mock_browser=True)
 
 def post_crawling(url:str):
-    
     url = "https://www.clien.net" + url
     r = session.get(url)
     post_content = r.html.find('.post_content', first=True)
@@ -16,11 +16,15 @@ def post_crawling(url:str):
             print(i.text)
 
 def comment_crawling(url:str):
-    url = "https://www.clien.net" + url
+    url = "https://www.clien.net" + url.split("?")[0] + "/comment?ps=1000"
     print(url)
     r = session.get(url)
-    r.html.render(wait=10)
-    comment_view = r.html.find('.comment_view', first=False)
+  
+    try:
+        comment_view = r.html.find('.comment_view', first=False)
+    except ParserError:
+        print("Not exist comment!")
+        return
     for comment in comment_view:
         ps = comment.find('p')
         for p in ps:
@@ -37,5 +41,6 @@ def getLink(group: str, start_page:int, end_page: int):
     for link in link_list:
         comment_crawling(link)
         #post_crawling(link)
-getLink(group[0], 7, 8)
+getLink(group[0], 0, 1)
+
 
