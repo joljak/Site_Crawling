@@ -23,7 +23,6 @@ def data_crawling(url: str):
         nickname = img.attrs['alt']
     else:
         nickname = post_nickname.text
-    print("https://www.clien.net" + url)
     post_p = r.html.find('.post_content', first=True).find('p')
     for i in post_p:
         if i.text != "":
@@ -68,7 +67,7 @@ def getLink(group: str, start_page: int, end_page: int):
 
     for link in link_list:
         data_crawling(link)
-    time.sleep(3)
+    time.sleep(10)
 
 
 for group in group:
