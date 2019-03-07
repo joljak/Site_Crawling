@@ -21,3 +21,12 @@ crawling repo for collecting data from social sites
 > - Dogdrip [Link](https://www.dogdrip.net/)<br>
 > - Naver [Link](https://www.naver.com/)<br>
 > - Daum [Link](https://www.daum.net/)
+
+**install package on ubuntu**
+
+> - sudo add-apt-repository ppa:jonathonf/python-3.6
+> - sudo apt-get update
+> - sudo apt-get install python3.6
+> - sudo apt-get install python3-pip
+> - python3.6 -m pip install requests-html
+
