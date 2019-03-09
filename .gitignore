@@ -1,6 +1,7 @@
 ### Custom ###
 .vscode/
 clien/datafile/*
+*.whl
 
 # Created by https://www.gitignore.io/api/venv,django,python,pycharm
 # Edit at https://www.gitignore.io/?templates=venv,django,python,pycharm
