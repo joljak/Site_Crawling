@@ -242,6 +242,10 @@ dmypy.json
 ### Python Patch ###
 .venv/
 
+### AWS ###
+# accessKey for AWS
+accessKeys.csv
+
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
