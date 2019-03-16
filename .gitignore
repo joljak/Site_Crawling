@@ -8,6 +8,9 @@
 .AppleDouble
 .LSOverride
 
+# vscode
+.vscode
+
 # Icon must end with two \r
 Icon
 
@@ -238,6 +241,10 @@ dmypy.json
 
 ### Python Patch ###
 .venv/
+
+### AWS ###
+# accessKey for AWS
+accessKeys.csv
 
 ### Windows ###
 # Windows thumbnail cache files
