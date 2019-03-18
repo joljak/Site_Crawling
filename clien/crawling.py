@@ -5,17 +5,17 @@ import time
 import csv
 import datetime
 
-FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../datafile"))
+FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../datafile"))
 TODAY_DATE = datetime.date.today().isoformat()
 FILE_NAME = FILE_DIRECTORY + f'/{TODAY_DATE}_Clien_Data.csv'
 GROUP = ['community', 'allinfo', 'allreview', 'allsell']
 LINK_LIST = []
 
-SESSION = HTMLSession(mock_browser=True)
 
 
 def Crawling(url: str):
     ### POST ###
+    SESSION = HTMLSession(mock_browser=True)
     r = SESSION.get("https://www.clien.net" + url)
     print("https://www.clien.net" + url)
     # Error Exception: '게시글 삭제되었을 때'
@@ -34,6 +34,7 @@ def Crawling(url: str):
                 csv.writer(link_csv).writerow(["https://www.clien.net" + url, "post", nickname, i.text])
 
     ### COMMENT ###
+    SESSION = HTMLSession(mock_browser=True)
     r = SESSION.get("https://www.clien.net" + url.split("?")[0] + "/comment?ps=1000")
 
     try:
@@ -58,6 +59,7 @@ def Crawling(url: str):
 
 
 def getPostLink(group: str, start_page: int = 0, end_page: int = 1):
+    SESSION = HTMLSession(mock_browser=True)
     for page in range(start_page, end_page):
         r = SESSION.get('https://www.clien.net/service/group/' + group + "?po=" + str(page))
         list_subject = r.html.find('.symph_row > .list_title > .list_subject')
@@ -65,12 +67,11 @@ def getPostLink(group: str, start_page: int = 0, end_page: int = 1):
             LINK_LIST.append(subject.attrs['href'])
     print(LINK_LIST)
     for link in LINK_LIST:
-        time.sleep(3)
         Crawling(link)
 
 
 
 for group in GROUP:
     getPostLink(group, 0, 10)
-    getPostLink(group, 10, 20)
-    getPostLink(group, 20, 30)
+    #getPostLink(group, 10, 20)
+    #getPostLink(group, 20, 30)
