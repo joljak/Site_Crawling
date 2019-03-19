@@ -2,22 +2,21 @@ from requests_html import HTMLSession
 import os
 import time
 import csv
-import datetime
 
 
-FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../datafile"))
-TODAY_DATE = datetime.date.today().isoformat()
-FILE_NAME = FILE_DIRECTORY + f'/{TODAY_DATE}_Inven_Data.csv'
-SLANG = []
+
+FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\datafile"))
+SLANG = '개새끼'
+FILE_NAME = FILE_DIRECTORY + f'/Inven_{SLANG}.csv'
 LINK_LIST = []
 
-def getLink(slang:str, start_page:int=1, end_page:int=2):
+def getLink(start:int=1, end:int=2):
     SESSION = HTMLSession(mock_browser=True)
-    for page in range(start_page, end_page):
-        r = SESSION.get('http://www.inven.co.kr/search/webzine/article/'+slang +'/'+str(page))
-        items = r.html.find('.news_list > li > h1 > a')
-        for item in items:
-            LINK_LIST.append(item.attrs['href'])
+    for page in range(start, end):
+        r = SESSION.get('http://www.inven.co.kr/search/webzine/article/'+SLANG +'/'+str(page))
+        link_list = r.html.find('.news_list > li > h1 > a')
+        for link in link_list:
+            LINK_LIST.append(link.attrs['href'])
     SESSION.close()
 
 
@@ -49,12 +48,15 @@ def crawling(url:str):
         with open(FILE_NAME, 'a', encoding='utf-8', newline='\n') as link_csv:
             csv.writer(link_csv).writerow([url, "comment", comment_nickname, comment_content])
     '''
-    #SESSION.close()
+    SESSION.close()
 
-getLink('씨발', 1, 100)
+getLink(1, 100)
+count = 0
 for link in LINK_LIST:
+    count = count + 1
     crawling(link)
-    time.sleep(1)
+    if count % 5 == 0:
+        time.sleep(4)
 
 
 
