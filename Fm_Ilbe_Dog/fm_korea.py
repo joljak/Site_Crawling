@@ -26,6 +26,29 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 TODAY_DATE = datetime.date.today().isoformat()
 
 
+def upload_s3(s3, local_file_path, bucket, obj):
+    """
+    :param s3: AWS 서비스명, 여기서는 S3
+    :param local_file_path: 로컬 파일 이름
+    :param bucket: 업로드할 버킷 명
+    :param obj: 업로드할 경로 ex: FM_Korea/FM_korea_ㄲㅈ_contents.csv
+    :return:
+    """
+
+    s3.upload_file(local_file_path, bucket, obj)
+
+
+def download_s3(s3, bucket, obj, local_file_path):
+    """
+    :param s3: AWS 서비스명, 여기서는 S3
+    :param bucket: 다운로드할 버킷 명
+    :param obj: 다운로드할 파일 경로 ex: FM_Korea/FM_korea_ㄲㅈ_contents.csv
+    :param local_file_path: 로컬 파일 이름
+    :return:
+    """
+    s3.download_file(bucket, obj, local_file_path)
+
+
 def collect_fm_korea_document_link(keyword):
     """
     FM 코리아 통합검색 링크 크롤링
@@ -42,7 +65,9 @@ def collect_fm_korea_document_link(keyword):
         '#content > div > h3 > span', first=True)
     result_pages = int(re.sub("[^0-9]", "", pages_text.text))
     pages = result_pages if result_pages < 1000 else 1000
+
     print(f'Crawling page: {pages}')
+
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'Keyword: {keyword} Crawling page: {pages}')
 
@@ -58,26 +83,31 @@ def collect_fm_korea_document_link(keyword):
 
     bar = Bar('Processing', max=pages)
     for i in range(pages):
-        # Search link and text result via keyword
-        time.sleep(12)
-        bar.next()
-        fm_korea_docs = session.get(
-            f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={i+1}')
-        result_list = fm_korea_docs.html.find('#content > div > ul.searchResult > li > dl > dt > a')
+        try:
+            # Search link and text result via keyword
+            time.sleep(12)
+            bar.next()
+            fm_korea_docs = session.get(
+                f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={i+1}')
+            result_list = fm_korea_docs.html.find('#content > div > ul.searchResult > li > dl > dt > a')
 
-        result_links = list(result.absolute_links.pop() for result in result_list)
+            result_links = list(result.absolute_links.pop() for result in result_list)
 
-        with open(file_name, 'a') as link_csv:
-            link_writer = csv.writer(link_csv, dialect='excel', delimiter='\n')
-            if len(result_links) == 0:
-                # if no result
-                print(f' : {len(result_links)} failed')
-                bot.sendMessage(chat_id=CHAT_ID,
-                                text=f'FM_Korea {keyword}_page_{i+1} : {len(result_links)} failed')
-                continue
-            else:
-                link_writer.writerow(result_links)
+            with open(file_name, 'a') as link_csv:
+                link_writer = csv.writer(link_csv, dialect='excel', delimiter='\n')
+                if len(result_links) == 0:
+                    # if no result
+                    print(f' : {len(result_links)} failed')
+                    bot.sendMessage(chat_id=CHAT_ID,
+                                    text=f'FM_Korea {keyword}_page_{i+1} : {len(result_links)} failed')
+                    continue
+                else:
+                    link_writer.writerow(result_links)
+        except Exception as e:
+            bot.sendMessage(chat_id=CHAT_ID,
+                            text=e)
     bar.finish()
+    session.close()
 
 
 def collect_fm_korea_document_content(keyword):
@@ -91,33 +121,74 @@ def collect_fm_korea_document_content(keyword):
     session = HTMLSession(mock_browser=True)
 
     link_file_name = f'FM_korea_{keyword}_links.csv'
+    content_file_name = f'FM_korea_{keyword}_contents.csv'
     if os.path.exists(link_file_name) is False:
         # Check CSV file exists
         print('No CSV file found! Exiting...')
         exit()
 
+    if os.path.exists(content_file_name) is False:
+        # Make content CSV file
+        open(content_file_name, 'a').close()
+
     with open(link_file_name, newline='') as csv_file:
         # Open csv file to read link
         line_reader = csv.reader(csv_file)
+
+        with open(content_file_name, 'a') as content_csv:
+            # Write field name on header of CSV
+            field_name = ['link', 'content']
+            content_writer = csv.DictWriter(content_csv, fieldnames=field_name)
+            content_writer.writeheader()
+            content_csv.close()
+
         for line in line_reader:
             # Crawl content data from each link_line
-            link = ''.join(line)
-            print(f'get {link}')
-            result = session.get(link).html.find('#bd_capture > div.rd_body.clear > article', first=True)
-            # result = result_list[0].text
-            print(result.replace('\n', ' '))
-            time.sleep(13)
+            try:
+                link = ''.join(line)
+                print(f'get {link}')
+                page_result = session.get(link).html
 
+                with open(content_file_name, 'a') as content_csv:
 
-    # comment_1666749813 > div:nth-child(2) > div
-    # comment_1666753972 > div:nth-child(3) > div
-    # comment_1666754383 > div:nth-child(2) > div
+                    content_writer = csv.DictWriter(content_csv, fieldnames=field_name)
+
+                    # Title
+                    title_content = page_result.find(
+                        '#bd_capture > div.rd_hd.clear > div.board.clear > div.top_area.ngeb > h1 > span', first=True).text
+                    if title_content != '':
+                        # If the content is not blank
+                        content_writer.writerow({'link': link, 'content': title_content})
+
+                    # Content
+                    body_content = page_result.find(
+                        '#bd_capture > div.rd_body.clear > article', first=True).text.replace("\n", " ")
+                    print(body_content)
+                    if body_content != '':
+                        # If the content is not blank
+                        content_writer.writerow({'link': link, 'content': body_content})
+
+                    # Comment text
+                    comments = page_result.find('ul.fdb_lst_ul > li > div:nth-of-type(2) > div.xe_content')
+                    for comment in comments:
+                        # Replace line change into blank
+                        comment_content = comment.text.replace("\n", " ")
+                        if comment_content != '':
+                            # If the content is not blank
+                            content_writer.writerow({'link': link, 'content': comment_content})
+                    time.sleep(13)
+            except Exception as e:
+                bot.sendMessage(chat_id=CHAT_ID,
+                                text=e)
+    session.close()
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         # Exit if number of argument is incorrect
+        print('가져올 데이터 [link, content]')
+        print('단어 선택 unordered: [0 - 180] | namu_wiki: [0-156]\n')
         print('usage: python fm_korea.py link namu_wiki 0')
-
         exit()
 
     # 가져올 데이터 [link, content]
@@ -139,7 +210,7 @@ if __name__ == '__main__':
 
     print(f'FM_Korea {content_type} Crawling start!!\n')
     bot.sendMessage(chat_id=CHAT_ID,
-                    text=f'FM_Korea {content_type} Crawling start!!\n')
+                    text=f'FM_Korea {content_type} {keyword}({slang_choice}) Crawling start!!\n')
 
     if content_type == 'link':
         collect_fm_korea_document_link(keyword)
