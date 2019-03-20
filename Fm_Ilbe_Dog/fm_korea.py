@@ -64,7 +64,7 @@ def collect_fm_korea_document_link(keyword):
             time.sleep(12)
             bar.next()
             fm_korea_docs = session.get(
-                f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={i+1}')
+                f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={i + 1}')
             result_list = fm_korea_docs.html.find('#content > div > ul.searchResult > li > dl > dt > a')
 
             result_links = list(result.absolute_links.pop() for result in result_list)
@@ -75,10 +75,11 @@ def collect_fm_korea_document_link(keyword):
                     # if no result
                     print(f' : {len(result_links)} failed')
                     bot.sendMessage(chat_id=CHAT_ID,
-                                    text=f'FM_Korea {keyword}_page_{i+1} : {len(result_links)} failed')
+                                    text=f'FM_Korea {keyword}_page_{i + 1} : {len(result_links)} failed')
                     continue
                 else:
                     link_writer.writerow(result_links)
+
         except Exception as e:
             bot.sendMessage(chat_id=CHAT_ID,
                             text=e)
@@ -131,21 +132,32 @@ def collect_fm_korea_document_content(keyword):
 
                     # Title
                     title_content = page_result.find(
-                        '#bd_capture > div.rd_hd.clear > div.board.clear > div.top_area.ngeb > h1 > span', first=True).text
-                    if title_content != '':
+                        '#bd_capture > div.rd_hd.clear > div.board.clear > div.top_area.ngeb > h1 > span',
+                        first=True).text
+                    if title_content == '':
                         # If the content is not blank
+                        bot.sendMessage(chat_id=CHAT_ID,
+                                        text=f'link_id: {link[24:]} title empty')
+                    else:
                         content_writer.writerow({'link': link, 'content': title_content})
 
                     # Content
                     body_content = page_result.find(
                         '#bd_capture > div.rd_body.clear > article', first=True).text.replace("\n", " ")
                     print(body_content)
-                    if body_content != '':
+                    if body_content == '':
                         # If the content is not blank
+                        bot.sendMessage(chat_id=CHAT_ID,
+                                        text=f'link_id: {link[24:]} body empty')
+                    else:
                         content_writer.writerow({'link': link, 'content': body_content})
 
                     # Comment text
                     comments = page_result.find('ul.fdb_lst_ul > li > div:nth-of-type(2) > div.xe_content')
+                    if len(comments) == 0:
+                        # Send Telegram if the content is None
+                        bot.sendMessage(chat_id=CHAT_ID,
+                                        text=f'link_id: {link[24:]} comment empty')
                     for comment in comments:
                         # Replace line change into blank
                         comment_content = comment.text.replace("\n", " ")
@@ -153,6 +165,7 @@ def collect_fm_korea_document_content(keyword):
                             # If the content is not blank
                             content_writer.writerow({'link': link, 'content': comment_content})
                     time.sleep(13)
+
             except Exception as e:
                 bot.sendMessage(chat_id=CHAT_ID,
                                 text=e)
@@ -190,7 +203,6 @@ if __name__ == '__main__':
 
     if content_type == 'link':
         collect_fm_korea_document_link(keyword)
-        time.sleep(40)
 
     elif content_type == 'content':
         collect_fm_korea_document_content(keyword)
