@@ -1,5 +1,4 @@
 import csv
-import datetime
 import json
 import os
 import re
@@ -22,7 +21,6 @@ from requests_html import HTMLSession
 
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
-TODAY_DATE = datetime.date.today().isoformat()
 
 
 def collect_fm_korea_document_link(keyword):
@@ -48,41 +46,56 @@ def collect_fm_korea_document_link(keyword):
                     text=f'Keyword: {keyword} Crawling page: {pages}')
 
     # Make csv file to save document link
-    file_name = f'FM_korea_{keyword}_links.csv'
-    if os.path.exists(file_name):
-        # remove file if exists and make over
-        os.remove(file_name)
-        open(file_name, 'a').close()
+    file_name = f'fm_korea/FM_korea_{keyword}_links.csv'
+    # if os.path.exists(file_name):
+    #     # remove file if exists and make over
+    #     os.remove(file_name)
+    #     open(file_name, 'a').close()
 
-    elif os.path.exists(file_name) is False:
+    os.makedirs(os.path.dirname(file_name), exist_ok=True)
+    if os.path.exists(file_name) is False:
         open(file_name, 'a').close()
 
     bar = Bar('Processing', max=pages)
-    for i in range(pages):
+    for number in range(pages):
         try:
             # Search link and text result via keyword
             time.sleep(12)
             bar.next()
             fm_korea_docs = session.get(
-                f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={i + 1}')
-            result_list = fm_korea_docs.html.find('#content > div > ul.searchResult > li > dl > dt > a')
+                f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={number + 1}').html
 
-            result_links = list(result.absolute_links.pop() for result in result_list)
+            is_empty_text = fm_korea_docs.find(
+                '#content > div > span', first=True)
 
-            with open(file_name, 'a') as link_csv:
-                link_writer = csv.writer(link_csv, dialect='excel', delimiter='\n')
-                if len(result_links) == 0:
-                    # if no result
-                    print(f' : {len(result_links)} failed')
-                    bot.sendMessage(chat_id=CHAT_ID,
-                                    text=f'FM_Korea {keyword}_page_{i + 1} : {len(result_links)} failed')
-                    continue
-                else:
-                    link_writer.writerow(result_links)
+            if is_empty_text is None:
+
+                result_list = fm_korea_docs.find('#content > div > ul.searchResult > li > dl > dt > a')
+
+                result_links = list(result.absolute_links.pop() for result in result_list)
+
+                with open(file_name, 'a') as link_csv:
+                    link_writer = csv.writer(link_csv, dialect='excel', delimiter='\n')
+                    if len(result_links) == 0:
+                        # if no result
+                        print(f' : {len(result_links)} failed')
+                        bot.sendMessage(chat_id=CHAT_ID,
+                                        text=f'FM_Korea {keyword}_page_{number + 1} : {len(result_links)} failed')
+                        continue
+                    else:
+                        link_writer.writerow(result_links)
+            else:
+                # Exit if the list doesn't exist
+                print(f"{keyword}:Page {number + 1} empty. Finishing keyword..")
+                bot.sendMessage(chat_id=CHAT_ID,
+                                text=f"{keyword}:Page {number + 1} empty. Finishing keyword..")
+                break
 
         except Exception as e:
             bot.sendMessage(chat_id=CHAT_ID,
                             text=e)
+    bot.sendMessage(chat_id=CHAT_ID,
+                    text=f'FM_Korea {content_type} {keyword}({slang_choice}) link Done!\n')
     bar.finish()
     session.close()
 
@@ -169,6 +182,8 @@ def collect_fm_korea_document_content(keyword):
             except Exception as e:
                 bot.sendMessage(chat_id=CHAT_ID,
                                 text=e)
+    bot.sendMessage(chat_id=CHAT_ID,
+                    text=f'FM_Korea {content_type} {keyword}({slang_choice}) content Done!\n')
     session.close()
 
 
