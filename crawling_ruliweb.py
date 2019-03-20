@@ -2,9 +2,10 @@ from requests_html import HTMLSession
 import os
 import time
 import csv
+import sys
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\datafile"))
-SLANG = '씨발'
+SLANG = str(sys.argv[1])
 FILE_NAME = FILE_DIRECTORY + f'/Ruli_{SLANG}.csv'
 BOARD_LIST = {'300143': '정치유머', '300148': '유머'}  # 300143 유머게시판 , 300148 정치게시판
 
@@ -35,7 +36,7 @@ def crawling(board:str):
             title = subject.text.replace('뿅뿅', SLANG)
             nickname = table_body.find('.writer.text_over > a', first=True).text
             with open(FILE_NAME, 'a', encoding='utf-8', newline='\n') as data_csv:
-                csv.writer(data_csv).writerow([link, title, nickname])
+                csv.writer(data_csv).writerow([link, nickname, title])
         page = page + 1
 
 
