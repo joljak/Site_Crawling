@@ -110,8 +110,8 @@ def collect_fm_korea_document_content(keyword):
     # HTMLSession with mock_browser
     session = HTMLSession(mock_browser=True)
 
-    link_file_name = f'FM_korea_{keyword}_links.csv'
-    content_file_name = f'FM_korea_{keyword}_contents.csv'
+    link_file_name = f'fm_korea/FM_korea_{keyword}_links.csv'
+    content_file_name = f'fm_korea/FM_korea_{keyword}_contents.csv'
     if os.path.exists(link_file_name) is False:
         # Check CSV file exists
         print('No CSV file found! Exiting...')
