@@ -144,26 +144,30 @@ def collect_fm_korea_document_content(keyword):
                     content_writer = csv.DictWriter(content_csv, fieldnames=field_name)
 
                     # Title
-                    title_content = page_result.find(
+                    title = page_result.find(
                         '#bd_capture > div.rd_hd.clear > div.board.clear > div.top_area.ngeb > h1 > span',
-                        first=True).text
-                    if title_content == '':
-                        # If the content is not blank
+                        first=True)
+                    if title is None:
+                        # If the title is blank, pass the line
                         bot.sendMessage(chat_id=CHAT_ID,
-                                        text=f'link_id: {link[24:]} title empty')
+                                        text=f'link_id: {link[24:]} title empty or deleted')
+                        continue
                     else:
-                        content_writer.writerow({'link': link, 'content': title_content})
+                        content_writer.writerow({'link': link, 'content': title.text})
 
                     # Content
-                    body_content = page_result.find(
-                        '#bd_capture > div.rd_body.clear > article', first=True).text.replace("\n", " ")
-                    print(body_content)
-                    if body_content == '':
+                    body_divide = page_result.find(
+                        '#bd_capture > div.rd_body.clear > article', first=True).text.split('\n')
+                    if len(body_divide) == 0:
                         # If the content is not blank
                         bot.sendMessage(chat_id=CHAT_ID,
                                         text=f'link_id: {link[24:]} body empty')
                     else:
-                        content_writer.writerow({'link': link, 'content': body_content})
+                        for body in body_divide:
+                            if body == '':
+                                continue
+                            else:
+                                content_writer.writerow({'link': link, 'content': body.text.replace("\n", "")})
 
                     # Comment text
                     comments = page_result.find('ul.fdb_lst_ul > li > div:nth-of-type(2) > div.xe_content')
@@ -174,7 +178,9 @@ def collect_fm_korea_document_content(keyword):
                     for comment in comments:
                         # Replace line change into blank
                         comment_content = comment.text.replace("\n", " ")
-                        if comment_content != '':
+                        if comment_content == '':
+                            continue
+                        else:
                             # If the content is not blank
                             content_writer.writerow({'link': link, 'content': comment_content})
                     time.sleep(13)
@@ -182,6 +188,7 @@ def collect_fm_korea_document_content(keyword):
             except Exception as e:
                 bot.sendMessage(chat_id=CHAT_ID,
                                 text=e)
+
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) content Done!\n')
     session.close()
