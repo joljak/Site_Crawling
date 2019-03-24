@@ -6,13 +6,12 @@ import sys
 
 
 def collect_ruliweb_document_content(link: str):
-    session = HTMLSession(mock_browser=True)
     field_names = ['link', 'content']
     if os.path.exists(content_file_name) is False:
         with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writeheader()
-
+    session = HTMLSession(mock_browser=True)
     r = session.get(link)
 
     ### Title ###
@@ -46,7 +45,7 @@ def collect_ruliweb_document_link(board: str):
     field_names = ['link']
 
     if os.path.exists(link_file_name) is False:
-        with open(link_file_name, 'a', newline='\n') as csv_file:
+        with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writeheader()
 
@@ -64,7 +63,7 @@ def collect_ruliweb_document_link(board: str):
             count = count + 1
             continue
 
-        with open(link_file_name, 'a', newline='\n') as csv_file:
+        with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             for table_body in table_body_list[notice:]:
                 link = table_body.find('.subject > div > a', first=True).attrs['href']
@@ -98,6 +97,3 @@ if __name__ == '__main__':
                 collect_ruliweb_document_content(link[0])
     else:
         print("Context Error")
-
-
-

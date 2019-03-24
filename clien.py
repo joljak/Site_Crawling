@@ -1,77 +1,114 @@
 from requests_html import HTMLSession
 from lxml.etree import ParserError
 import os
+import sys
 import time
 import csv
-import datetime
-
-FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../datafile"))
-TODAY_DATE = datetime.date.today().isoformat()
-FILE_NAME = FILE_DIRECTORY + f'/{TODAY_DATE}_Clien_Data.csv'
-GROUP = ['community', 'allinfo', 'allreview', 'allsell']
-LINK_LIST = []
 
 
+def collect_clien_document_link():
+    field_names = ['link']
+    if os.path.exists(link_file_name) is False:
+        with open(link_file_name, 'a', newline='\n') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writeheader()
 
-def Crawling(url: str):
-    ### POST ###
-    SESSION = HTMLSession(mock_browser=True)
-    r = SESSION.get("https://www.clien.net" + url)
-    print("https://www.clien.net" + url)
-    # Error Exception: '게시글 삭제되었을 때'
-    if r.html.find('.error', first=True) is not None:
+    session = HTMLSession(mock_browser=True)
+
+    for page in range(100):
+        r = session.get('https://www.clien.net/service/search?q=' + SLANG + '&sort=recency&p=' + str(
+            page) + '&boardCd=&isBoard=false')
+
+        for item in r.html.find('#div_content > div.search_list > div > div.list_title > a'):
+            with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=field_names)
+                writer.writerow({'link': item.attrs['href']})
+
+
+def collect_clien_document_content(link: str):
+    field_names = ['link', 'content']
+    if os.path.exists(content_file_name) is False:
+        with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writeheader()
+    session = HTMLSession(mock_browser=True)
+    r = session.get(link)
+
+    ### Exception ###
+    # 404 Error
+    if r.html.find('#div_content > .content_serviceError', first=True) is not None:
         return
-    else:
-        nickname = r.html.find('.nickname', first=True)
-    # Image nickname check
-    img = nickname.find('img', first=True)
-    nickname = img.attrs['alt'] if img is not None else nickname.text
-    # crawling post data
-    post_p = r.html.find('.post_content', first=True).find('p')
-    for i in post_p:
-        if i.text != "":
-            with open(FILE_NAME, 'a', encoding='utf-8', newline='\n') as link_csv:
-                csv.writer(link_csv).writerow(["https://www.clien.net" + url, "post", nickname, i.text])
+    # Login Error
+    if r.html.find('.content_signin', first=True) is not None:
+        return
 
-    ### COMMENT ###
-    SESSION = HTMLSession(mock_browser=True)
-    r = SESSION.get("https://www.clien.net" + url.split("?")[0] + "/comment?ps=1000")
+    ### Title ###
+    content = r.html.find('#div_content > div.post_title.symph_row > h3 > span', first=True).text
+    with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+        writer.writerow({'link': link, 'content': content})
 
+    ### Post ###
+    content = ""
+    for post in r.html.find('#div_content > div.post_view > div.post_content > article > div'):
+        content = content + post.text.replace('\n', ' ').replace('  ', ' ')
+    with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+        writer.writerow({'link': link, 'content': content})
+
+    ### Comment ###
+    r = session.get(link + '/comment?ps=200')
     try:
-        comment_row = r.html.find('.comment_row')
+        comment_content = r.html.find('.comment_content')
     except ParserError:
+        time.sleep(4)
         return
-
-    for comment in comment_row:
-        if comment.find('.blocked', first=True) is not None:
-            continue
-        nickname = comment.find('.nickname', first=True)
-        img = nickname.find('img', first=True)
-        nickname = img.attrs['alt'] if img is not None else nickname.text
-
-        comment_view = comment.find('.comment_view', first=True)
-        p_list = comment_view.find('p')
-        for p in p_list:
-            if p.text != "":
-                with open(FILE_NAME, 'a', encoding='utf-8', newline='\n') as link_csv:
-                    csv.writer(link_csv).writerow(
-                        ["https://www.clien.net" + url, "comment", nickname, p.text])
+    for comment in comment_content:
+        with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writerow({'link': link, 'content': comment.find('.comment_view', first=True).text.replace('\n', ' ')})
+    time.sleep(4)
 
 
-def getPostLink(group: str, start_page: int = 0, end_page: int = 1):
-    SESSION = HTMLSession(mock_browser=True)
-    for page in range(start_page, end_page):
-        r = SESSION.get('https://www.clien.net/service/group/' + group + "?po=" + str(page))
-        list_subject = r.html.find('.symph_row > .list_title > .list_subject')
-        for subject in list_subject:
-            LINK_LIST.append(subject.attrs['href'])
-    print(LINK_LIST)
-    for link in LINK_LIST:
-        Crawling(link)
+def test():
+    link = 'https://www.clien.net/service/board/park/12942470/comment?ps=200'
+    session = HTMLSession(mock_browser=True)
+    r = session.get(link)
+    comment_content = r.html.find('.comment_content')
+    for comment in comment_content:
+        print(comment.find('.comment_view', first=True).text.replace('\n', ' '))
+    #time.sleep(4)
 
 
+if __name__ == '__main__':
+    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\datafile"))
+    if len(sys.argv) < 3:
+        print('Argument Error')
+        print('Choice Type [link, content] and Input Slang')
+        print('usage) python clien.py [Type] [Slang]')
+        exit()
 
-for group in GROUP:
-    getPostLink(group, 0, 10)
-    #getPostLink(group, 10, 20)
-    #getPostLink(group, 20, 30)
+    TYPE = str(sys.argv[1])
+    if TYPE == 'test':
+        test()
+        exit()
+    SLANG = str(sys.argv[2])
+
+    link_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_links.csv'
+    content_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_content.csv'
+
+    if TYPE == 'link':
+        collect_clien_document_link()
+
+    elif TYPE == 'content':
+        if os.path.exists(link_file_name) is False:
+            print('FileNotFoundError: No such file!!')
+            exit()
+        with open(link_file_name, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            next(reader, None)
+            for link in reader:
+                collect_clien_document_content(link[0])
+
+    else:
+        print("Context Error")
