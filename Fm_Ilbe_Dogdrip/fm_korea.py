@@ -5,12 +5,20 @@ import re
 import sys
 import time
 
+import boto3
 import telegram
 
 from progress.bar import Bar
 from requests_html import HTMLSession
 
+from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
+
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
+
+# S3 bucket config
+OBJ_FOLDER = "FM_Korea"
+S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
+s3 = boto3.client('s3')
 
 
 def collect_fm_korea_document_link(keyword):
@@ -92,6 +100,7 @@ def collect_fm_korea_document_link(keyword):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) link Done!\n')
     bar.finish()
+    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     session.close()
 
 
@@ -190,7 +199,7 @@ def collect_fm_korea_document_content(keyword):
 
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) content Done!\n')
-    session.close()
+    upload_s3(s3, S3_BUCKET, content_file_name, '/'.join([OBJ_FOLDER, content_file_name]))
 
 
 if __name__ == '__main__':

@@ -4,21 +4,28 @@ import os
 import sys
 import time
 
+import boto3
 import telegram
 
 from requests_html import HTMLSession
+
+from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
 # Keyword that doesn't exist
 KEYWORD_NOT_EXIST = []
 
+# S3 bucket config
+OBJ_FOLDER = "FM_Korea"
+S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
+s3 = boto3.client('s3')
+
 
 # 개드립 사이트는 자료수가 비교적 많이 적고 딱히 막히는 부분이 없는 것으로 판단하여
 # 모든 키워드 한번에 실행
 
 def collect_dog_drip_document_link(keyword):
-
     file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
@@ -83,11 +90,11 @@ def collect_dog_drip_document_link(keyword):
 
     # Return page number of keyword for logging
     session.close()
+    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     return page_sum
 
 
 def collect_dog_drip_document_content(keyword):
-
     link_file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
     content_file_name = f'dog_drip/Dog_drip_{keyword}_contents.csv'
 
@@ -223,6 +230,7 @@ def collect_dog_drip_document_content(keyword):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'{keyword} keyword {keyword_page_count} out of {row_count} Done.')
     session.close()
+    upload_s3(s3, S3_BUCKET, content_file_name, '/'.join([OBJ_FOLDER, content_file_name]))
     return keyword_page_count
 
 

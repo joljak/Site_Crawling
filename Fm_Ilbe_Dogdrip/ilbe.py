@@ -5,15 +5,23 @@ import re
 import sys
 import time
 
+import boto3
 import telegram
 
 from progress.bar import Bar
 from requests_html import HTMLSession
 
+from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
+
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
 # Keyword that doesn't exist
 KEYWORD_NOT_EXIST = []
+
+# S3 bucket config
+OBJ_FOLDER = "FM_Korea"
+S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
+s3 = boto3.client('s3')
 
 
 def collect_ilbe_document_link(keyword):
@@ -116,6 +124,7 @@ def collect_ilbe_document_link(keyword):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'Ilbe {content_type} {keyword}({slang_choice}) link Done!\n')
     bar.finish()
+    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     session.close()
 
 
@@ -246,6 +255,8 @@ def collect_dog_drip_document_content(keyword):
                 except Exception as e:
                     bot.sendMessage(chat_id=CHAT_ID,
                                     text=str(e))
+
+    upload_s3(s3, S3_BUCKET, link_file_name, '/'.join([OBJ_FOLDER, link_file_name]))
 
     # Send log through Telegram
     bot.sendMessage(chat_id=CHAT_ID,
