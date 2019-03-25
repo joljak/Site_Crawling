@@ -13,11 +13,11 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 # Keyword that doesn't exist
 KEYWORD_NOT_EXIST = []
 
+
 # 개드립 사이트는 자료수가 비교적 많이 적고 딱히 막히는 부분이 없는 것으로 판단하여
 # 모든 키워드 한번에 실행
 
 def collect_dog_drip_document_link(keyword):
-    session = HTMLSession(mock_browser=True)
 
     file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
 
@@ -35,6 +35,9 @@ def collect_dog_drip_document_link(keyword):
         try:
             # Repeat for 5000 pages on each keyword
             time.sleep(4)
+
+            # Make a new session for crawling
+            session = HTMLSession(mock_browser=True)
 
             search_page = session.get(f'https://www.dogdrip.net/index.php?'
                                       f'_filter=search&mid=dogdrip&search_target=title_content&'
@@ -70,9 +73,13 @@ def collect_dog_drip_document_link(keyword):
                 break
             page_sum += len(link_list)
 
+            # Close session
+            session.close()
+
         except Exception as e:
+            breakpoint()
             bot.sendMessage(chat_id=CHAT_ID,
-                            text=e)
+                            text=str(e))
 
     # Return page number of keyword for logging
     session.close()
@@ -80,7 +87,6 @@ def collect_dog_drip_document_link(keyword):
 
 
 def collect_dog_drip_document_content(keyword):
-    session = HTMLSession(mock_browser=True)
 
     link_file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
     content_file_name = f'dog_drip/Dog_drip_{keyword}_contents.csv'
@@ -130,6 +136,10 @@ def collect_dog_drip_document_content(keyword):
                 try:
                     # Get text from the link
                     link = ''.join(line)
+
+                    # Make a new session for crawling
+                    session = HTMLSession(mock_browser=True)
+
                     page_result = session.get(link).html
 
                     with open(content_file_name, 'a') as content_csv:
@@ -202,9 +212,12 @@ def collect_dog_drip_document_content(keyword):
                     # Count on keyword link
                     keyword_page_count += 1
 
+                    # Close session
+                    session.close()
+
                 except Exception as e:
                     bot.sendMessage(chat_id=CHAT_ID,
-                                    text=e)
+                                    text=str(e))
 
     # Send log through Telegram
     bot.sendMessage(chat_id=CHAT_ID,

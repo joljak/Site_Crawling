@@ -45,12 +45,11 @@ def collect_fm_korea_document_link(keyword):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'Keyword: {keyword} Crawling page: {pages}')
 
+    # Close session for list pages
+    session.close()
+
     # Make csv file to save document link
     file_name = f'fm_korea/FM_korea_{keyword}_links.csv'
-    # if os.path.exists(file_name):
-    #     # remove file if exists and make over
-    #     os.remove(file_name)
-    #     open(file_name, 'a').close()
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
     if os.path.exists(file_name) is False:
@@ -62,6 +61,9 @@ def collect_fm_korea_document_link(keyword):
             # Search link and text result via keyword
             time.sleep(12)
             bar.next()
+
+            session = HTMLSession(mock_browser=True)
+
             fm_korea_docs = session.get(
                 f'https://www.fmkorea.com/index.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={number + 1}').html
 
@@ -91,9 +93,12 @@ def collect_fm_korea_document_link(keyword):
                                 text=f"{keyword}:Page {number + 1} empty. Finishing keyword..")
                 break
 
+            # Close session
+            session.close()
+
         except Exception as e:
             bot.sendMessage(chat_id=CHAT_ID,
-                            text=e)
+                            text=str(e))
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) link Done!\n')
     bar.finish()
@@ -106,9 +111,6 @@ def collect_fm_korea_document_content(keyword):
     :param keyword: 욕설키워드
     :return:
     """
-
-    # HTMLSession with mock_browser
-    session = HTMLSession(mock_browser=True)
 
     link_file_name = f'fm_korea/FM_korea_{keyword}_links.csv'
     content_file_name = f'fm_korea/FM_korea_{keyword}_contents.csv'
@@ -137,6 +139,10 @@ def collect_fm_korea_document_content(keyword):
             try:
                 link = ''.join(line)
                 print(f'get {link}')
+
+                # Make a new session for crawling
+                session = HTMLSession(mock_browser=True)
+
                 page_result = session.get(link).html
 
                 with open(content_file_name, 'a') as content_csv:
@@ -185,9 +191,12 @@ def collect_fm_korea_document_content(keyword):
                             content_writer.writerow({'link': link, 'content': comment_content})
                     time.sleep(13)
 
+                # Close session
+                session.close()
+
             except Exception as e:
                 bot.sendMessage(chat_id=CHAT_ID,
-                                text=e)
+                                text=str(e))
 
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) content Done!\n')
