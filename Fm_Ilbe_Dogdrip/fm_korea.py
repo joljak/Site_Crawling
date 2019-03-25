@@ -10,16 +10,6 @@ import telegram
 from progress.bar import Bar
 from requests_html import HTMLSession
 
-# FM Korea
-# https://www.fmkorea.com/index.php?act=IS&is_keyword={}&mid=home&where=document&page=1
-
-# Ilbe
-# http://www.ilbe.com/?act=IS&where=document&is_keyword={}
-
-# Dogdrip
-# https://www.dogdrip.net/
-
-
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
 
