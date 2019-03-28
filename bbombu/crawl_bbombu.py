@@ -2,6 +2,7 @@ import os
 import time
 import csv
 import json
+import boto3
 
 from progress.bar import Bar
 from requests_html import HTMLSession
@@ -9,6 +10,12 @@ from requests_html import HTMLSession
 # STORE FILE INFORMATION
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__,"../../datafile"))
 SLANG_FILE = os.path.abspath(os.path.join(__file__,"../../slang.json"))
+BUCKET = "dankook-hunminjeongeum-data-bucket"
+S3 = ""
+
+# UPLOAD AWS_S3 - BOTO3
+def upload(s3, local_file_path, bucket, obj):
+	s3.upload_file(local_file_path, bucket, obj)
 
 # [S]KEYWORD SEARCH AND COLLECT LINK
 def collect_document_link(keyword, pages):
@@ -89,6 +96,9 @@ def collect_document_content(keyword, num):
 		bar.next()
 		exit()	
 
+	# UPLOAD TO S3
+	upload(S3,contents_file,BUCKET,"BBOMBU"+f"/bbombu_{keyword}_contents.csv")
+
 	# Close
 	bar.finish()
 	content.close()
@@ -98,6 +108,9 @@ def collect_document_content(keyword, num):
 # [E]COLLECT DOCUMENT BY LINK
 
 if __name__ == '__main__':
+
+	S3 = boto3.client('s3')
+
 	with open(SLANG_FILE) as slang_file:
 		slangs = json.load(slang_file)["unordered"]
 	

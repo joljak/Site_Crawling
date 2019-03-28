@@ -2,6 +2,7 @@ import os
 import time
 import csv
 import json
+import boto3
 
 from progress.bar import Bar
 from requests_html import HTMLSession
@@ -9,6 +10,13 @@ from requests_html import HTMLSession
 # STORE FILE INFORMATION
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__,"../../datafile"))
 SLANG_FILE = os.path.abspath(os.path.join(__file__,"../../slang.json"))
+BUCKET = "dankook-hunminjeongeum-data-bucket"
+S3 = ""
+
+# UPLOAD AWS_S3 - BOTO3
+def upload(s3, local_file_path, bucket, obj):
+	s3.upload_file(local_file_path, bucket, obj)
+
 
 # [S]KEYWORD SEARCH AND COLLECT LINK
 def collect_document_link(keyword, pages):
@@ -29,11 +37,11 @@ def collect_document_link(keyword, pages):
 
 	# Crawl Link
 	for i in range(pages):
-		time.sleep(12)
+#		time.sleep(12)
 		bar.next()
 		r = session.get(f'https://search.dcinside.com/post/p/{i + 1}/sort/latest/q/{keyword}')
 		dummy_links = r.html.find('#container > div > section.center_content > div.inner > div.integrate_cont.sch_result.result_all > ul > li > a')
-		with open(links_file,'a',newline='') as link:
+		with open(links_file,'a', encoding='utf-8',newline='') as link:
 			wr = csv.writer(link)
 			for i in dummy_links:
 				wr.writerow([i.attrs['href']])
@@ -49,7 +57,7 @@ def collect_document_link(keyword, pages):
 
 # [S]COLLECT DOCUMENT CONTENT BY LINK
 def collect_document_content(keyword, num):
-	
+		
 	# HTMLSession with mock browser
 	session = HTMLSession(mock_browser=True)
 
@@ -74,10 +82,10 @@ def collect_document_content(keyword, num):
 	# Crawl Contents
 	for rd_link in rd_links:
 		store = []
-		time.sleep(5)
+#		time.sleep(5)
 		r = session.get(rd_link[0])
 		# error handler
-		if(r.html.find('.box_infotxt delet',first=True) is not None:
+		if(r.html.find('.box_infotxt delet',first=True)) is not None:
 			return
 		
 		title = r.html.find('#container > section > article:nth-child(3) > div.view_content_wrap > header > div > h3 > span.title_subject')
@@ -88,6 +96,9 @@ def collect_document_content(keyword, num):
 				store.append(p.text.replace("\n"," "))
 		wr_contents.writerow([rd_link[0],title[0].text]+store)	
 		bar.next()	
+		
+	# UPLOAD TO S3
+	upload(S3,contents_file,BUCKET,"DC_INSIDE"+f"/dc_inside_{keyword}_contents.csv")
 
 	# Close
 	bar.finish()
@@ -99,6 +110,9 @@ def collect_document_content(keyword, num):
 
 
 if __name__ == '__main__':
+	
+	S3 = boto3.client('s3')
+	
 	with open(SLANG_FILE) as slang_file:
 		slangs = json.load(slang_file)["unordered"]
 	
