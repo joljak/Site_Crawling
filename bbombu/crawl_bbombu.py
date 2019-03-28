@@ -36,7 +36,7 @@ def collect_document_link(keyword, pages):
 
 	# Crawl Link
 	for i in range(pages):
-#		time.sleep(12)
+		time.sleep(5)
 		bar.next()
 		r = session.get(f'http://www.ppomppu.co.kr/search_bbs.php?page_no={i + 1}&keyword={keyword}')
 		dummy_links = r.html.find('#result-tab1 > form > div > div > span > a')
@@ -81,7 +81,7 @@ def collect_document_content(keyword, num):
 	# Crawl Contents
 	for rd_link in rd_links:
 		store = []
-#		time.sleep(5)
+		time.sleep(5)
 		r = session.get(rd_link[0])
 		
 		# error handler

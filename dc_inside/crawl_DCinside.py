@@ -37,7 +37,7 @@ def collect_document_link(keyword, pages):
 
 	# Crawl Link
 	for i in range(pages):
-#		time.sleep(12)
+		time.sleep(5)
 		bar.next()
 		r = session.get(f'https://search.dcinside.com/post/p/{i + 1}/sort/latest/q/{keyword}')
 		dummy_links = r.html.find('#container > div > section.center_content > div.inner > div.integrate_cont.sch_result.result_all > ul > li > a')
@@ -82,7 +82,7 @@ def collect_document_content(keyword, num):
 	# Crawl Contents
 	for rd_link in rd_links:
 		store = []
-#		time.sleep(5)
+		time.sleep(5)
 		r = session.get(rd_link[0])
 		# error handler
 		if(r.html.find('.box_infotxt delet',first=True)) is not None:
