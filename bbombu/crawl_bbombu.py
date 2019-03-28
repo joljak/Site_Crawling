@@ -76,28 +76,18 @@ def collect_document_content(keyword, num):
 		store = []
 #		time.sleep(5)
 		r = session.get(rd_link[0])
-		r.html.render()
-		print(r.html.find('.view_title2',first=True))
 		
-		#print(test.text)
-		post = r.html.find('table.pic_bg')	
-		post2 = post[2].find('tbody > tr > td > table > td.board-contents')
-		print(post2)		
-
-
-	#	for i in test2:
-	#		print(i.text)	
-	
-		exit()
-		title = r.html.find('.view_title2',fisrt=True)
-		post = r.html.find('.container',first =True)
-		for i in ['td.board-contents']:
-			posts = post.find(i)
-			for p in posts:
-				store.append(p.text.replace("\n"," "))
-				print(p.text)
-	#	wr_contents.writerow([rd_link[0],title[0].text]+store)	
-		bar.next()	
+		# error handler
+		if(r.html.find('.error1',first=True)) is not None:
+			return
+		
+		title = r.html.find('.view_title2',first=True)
+		post = r.html.find('.ori_comment')
+		for i in post:
+			store.append(i.text.replace("\n"," "))
+		wr_contents.writerow([rd_link[0],title.text]+store)
+		bar.next()
+		exit()	
 
 	# Close
 	bar.finish()
@@ -112,7 +102,7 @@ if __name__ == '__main__':
 		slangs = json.load(slang_file)["unordered"]
 	
 	for slang in slangs:
-		num = collect_document_link(slang,1)
+		num = collect_document_link(slang,4)
 		collect_document_content(slang,num)
 	
 

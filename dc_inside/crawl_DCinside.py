@@ -6,12 +6,6 @@ import json
 from progress.bar import Bar
 from requests_html import HTMLSession
 
-# SITE INFORMATION
-DC_INSIDE = "dc_inside"
-
-
-BBOMBU = "bbombu"
-
 # STORE FILE INFORMATION
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__,"../../datafile"))
 SLANG_FILE = os.path.abspath(os.path.join(__file__,"../../slang.json"))
@@ -82,6 +76,10 @@ def collect_document_content(keyword, num):
 		store = []
 		time.sleep(5)
 		r = session.get(rd_link[0])
+		# error handler
+		if(r.html.find('.box_infotxt delet',first=True) is not None:
+			return
+		
 		title = r.html.find('#container > section > article:nth-child(3) > div.view_content_wrap > header > div > h3 > span.title_subject')
 		post = r.html.find('.writing_view_box',first =True)
 		for i in ['div','p','span']:
