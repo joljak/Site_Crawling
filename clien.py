@@ -6,31 +6,21 @@ import time
 import csv
 
 
-def collect_clien_document_link():
-    field_names = ['link']
-    if os.path.exists(link_file_name) is False:
-        with open(link_file_name, 'a', newline='\n') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=field_names)
-            writer.writeheader()
-
+def collect_clien_document_link(idx: int):
     session = HTMLSession(mock_browser=True)
-
     for page in range(100):
         r = session.get('https://www.clien.net/service/search?q=' + SLANG + '&sort=recency&p=' + str(
             page) + '&boardCd=&isBoard=false')
-
-        for item in r.html.find('#div_content > div.search_list > div > div.list_title > a'):
+        for item in r.html.find(
+                '#div_content > div.contents_jirum > div.list_item.symph_row.jirum > .list_title.oneline > .list_subject > a'):
+            idx = idx + 1
             with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=field_names)
-                writer.writerow({'link': item.attrs['href']})
+                writer.writerow({'idx': idx, 'link': 'https://www.clien.net' + item.attrs['href']})
 
 
-def collect_clien_document_content(link: str):
-    field_names = ['link', 'content']
-    if os.path.exists(content_file_name) is False:
-        with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=field_names)
-            writer.writeheader()
+def collect_clien_document_content(idx: int, link: str):
+    field_names = ['idx', 'link', 'type', 'content']
     session = HTMLSession(mock_browser=True)
     r = session.get(link)
 
@@ -43,10 +33,14 @@ def collect_clien_document_content(link: str):
         return
 
     ### Title ###
-    content = r.html.find('#div_content > div.post_title.symph_row > h3 > span', first=True).text
+    try:
+        content = r.html.find('#div_content > div.post_title.symph_row > h3 > span', first=True).text
+    except AttributeError:
+        print(link)
+        return
     with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
-        writer.writerow({'link': link, 'content': content})
+        writer.writerow({'idx': idx, 'link': link, 'type': 'post', 'content': content})
 
     ### Post ###
     content = ""
@@ -54,30 +48,22 @@ def collect_clien_document_content(link: str):
         content = content + post.text.replace('\n', ' ').replace('  ', ' ')
     with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
-        writer.writerow({'link': link, 'content': content})
+        writer.writerow({'idx': idx, 'link': link, 'type': 'post', 'content': content})
 
     ### Comment ###
-    r = session.get(link + '/comment?ps=200')
+    r = session.get(link.split('?')[0] + '/comment?ps=200')
     try:
         comment_content = r.html.find('.comment_content')
     except ParserError:
-        time.sleep(4)
+        time.sleep(3)
         return
     for comment in comment_content:
         with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
-            writer.writerow({'link': link, 'content': comment.find('.comment_view', first=True).text.replace('\n', ' ')})
-    time.sleep(4)
-
-
-def test():
-    link = 'https://www.clien.net/service/board/park/12942470/comment?ps=200'
-    session = HTMLSession(mock_browser=True)
-    r = session.get(link)
-    comment_content = r.html.find('.comment_content')
-    for comment in comment_content:
-        print(comment.find('.comment_view', first=True).text.replace('\n', ' '))
-    #time.sleep(4)
+            writer.writerow(
+                {'idx': idx, 'link': link, 'type': 'comment',
+                 'content': comment.find('.comment_view', first=True).text.replace('\n', ' ')})
+    time.sleep(3)
 
 
 if __name__ == '__main__':
@@ -89,26 +75,55 @@ if __name__ == '__main__':
         exit()
 
     TYPE = str(sys.argv[1])
-    if TYPE == 'test':
-        test()
-        exit()
     SLANG = str(sys.argv[2])
 
     link_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_links.csv'
     content_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_content.csv'
 
     if TYPE == 'link':
-        collect_clien_document_link()
+        field_names = ['idx', 'link']
+        if os.path.exists(link_file_name) is False:
+            with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=field_names)
+                writer.writeheader()
+            idx = 0
+
+        else:
+            with open(link_file_name, 'r', encoding='utf-8') as csv_file:
+                reader = csv.reader(csv_file)
+                next(reader, None)
+                try:
+                    idx = int(list(reader)[-1][0])
+                except ValueError:
+                    idx = 0
+        collect_clien_document_link(idx)
 
     elif TYPE == 'content':
         if os.path.exists(link_file_name) is False:
             print('FileNotFoundError: No such file!!')
             exit()
-        with open(link_file_name, 'r') as csv_file:
+        if os.path.exists(content_file_name) is False:
+            with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=['idx', 'link', 'type', 'content'])
+                writer.writeheader()
+                idx = 0
+        else:
+            with open(content_file_name, 'r', encoding='utf-8') as csv_file:
+                reader = csv.reader(csv_file)
+                next(reader, None)
+                try:
+                    idx = int(list(reader)[-1][0])
+                except IndexError:
+                    idx = 0
+                except ValueError:
+                    idx = 0
+
+        with open(link_file_name, 'r', encoding='utf-8') as csv_file:
             reader = csv.reader(csv_file)
             next(reader, None)
-            for link in reader:
-                collect_clien_document_content(link[0])
-
+            for row in reader:
+                if idx == int(row[0]) - 1:
+                    collect_clien_document_content(row[0], row[1])
+                    idx += 1
     else:
         print("Context Error")
