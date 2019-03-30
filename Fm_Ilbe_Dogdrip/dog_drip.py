@@ -17,7 +17,7 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Korea"
+OBJ_FOLDER = "Dog_drip"
 S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
 s3 = boto3.client('s3')
 
@@ -64,7 +64,7 @@ def collect_dog_drip_document_link(keyword):
                 if len(link_list) == 0:
                     # Send log if the length is 0
                     bot.sendMessage(chat_id=CHAT_ID,
-                                    text=f'FM_Korea {keyword}_page_{number + 1} : {len(link_list)} failed')
+                                    text=f'Dog_drip {keyword}_page_{number + 1} : {len(link_list)} failed')
                     continue
                 else:
                     print(f'{keyword}:Page {number + 1} - {len(link_list)} links')

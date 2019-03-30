@@ -19,7 +19,7 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Korea"
+OBJ_FOLDER = "Ilbe"
 S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
 s3 = boto3.client('s3')
 
@@ -128,7 +128,7 @@ def collect_ilbe_document_link(keyword):
     session.close()
 
 
-def collect_dog_drip_document_content(keyword):
+def collect_ilbe_document_content(keyword):
     link_file_name = f'ilbe/Ilbe_{keyword}_links.csv'
     content_file_name = f'ilbe/Ilbe_{keyword}_contents.csv'
 
@@ -297,4 +297,4 @@ if __name__ == '__main__':
         collect_ilbe_document_link(keyword)
 
     elif content_type == 'content':
-        collect_dog_drip_document_content(keyword)
+        collect_ilbe_document_content(keyword)
