@@ -9,7 +9,7 @@ import telegram
 
 from requests_html import HTMLSession
 
-from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
+from s3_bucket_manage import upload_s3
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
