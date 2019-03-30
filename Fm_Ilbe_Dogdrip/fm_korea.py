@@ -11,13 +11,14 @@ import telegram
 from progress.bar import Bar
 from requests_html import HTMLSession
 
-from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
+from s3_bucket_manage import upload_s3
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
 # S3 bucket config
 OBJ_FOLDER = "FM_Korea"
-S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
+with open(os.path.join('bucket_name.json')) as slang_file:
+    S3_BUCKET = json.load(slang_file)['bucket']
 s3 = boto3.client('s3')
 
 

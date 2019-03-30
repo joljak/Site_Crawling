@@ -9,7 +9,7 @@ import telegram
 
 from requests_html import HTMLSession
 
-from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
+from s3_bucket_manage import upload_s3
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
@@ -17,8 +17,9 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Korea"
-S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
+OBJ_FOLDER = "Dog_drip"
+with open(os.path.join('bucket_name.json')) as slang_file:
+    S3_BUCKET = json.load(slang_file)['bucket']
 s3 = boto3.client('s3')
 
 
@@ -64,7 +65,7 @@ def collect_dog_drip_document_link(keyword):
                 if len(link_list) == 0:
                     # Send log if the length is 0
                     bot.sendMessage(chat_id=CHAT_ID,
-                                    text=f'FM_Korea {keyword}_page_{number + 1} : {len(link_list)} failed')
+                                    text=f'Dog_drip {keyword}_page_{number + 1} : {len(link_list)} failed')
                     continue
                 else:
                     print(f'{keyword}:Page {number + 1} - {len(link_list)} links')

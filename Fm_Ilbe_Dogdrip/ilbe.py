@@ -11,7 +11,7 @@ import telegram
 from progress.bar import Bar
 from requests_html import HTMLSession
 
-from Fm_Ilbe_Dogdrip.s3_bucket_manage import upload_s3
+from s3_bucket_manage import upload_s3
 
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
@@ -19,8 +19,10 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Korea"
-S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
+OBJ_FOLDER = "Ilbe"
+with open(os.path.join('bucket_name.json')) as slang_file:
+    S3_BUCKET = json.load(slang_file)['bucket']
+
 s3 = boto3.client('s3')
 
 
@@ -128,7 +130,7 @@ def collect_ilbe_document_link(keyword):
     session.close()
 
 
-def collect_dog_drip_document_content(keyword):
+def collect_ilbe_document_content(keyword):
     link_file_name = f'ilbe/Ilbe_{keyword}_links.csv'
     content_file_name = f'ilbe/Ilbe_{keyword}_contents.csv'
 
@@ -297,4 +299,4 @@ if __name__ == '__main__':
         collect_ilbe_document_link(keyword)
 
     elif content_type == 'content':
-        collect_dog_drip_document_content(keyword)
+        collect_ilbe_document_content(keyword)
