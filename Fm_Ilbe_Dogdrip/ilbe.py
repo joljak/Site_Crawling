@@ -256,7 +256,7 @@ def collect_ilbe_document_content(keyword):
                     bot.sendMessage(chat_id=CHAT_ID,
                                     text=str(e))
 
-    upload_s3(s3, S3_BUCKET, link_file_name, '/'.join([OBJ_FOLDER, link_file_name]))
+    upload_s3(s3, S3_BUCKET, content_file_name, '/'.join([OBJ_FOLDER, content_file_name]))
 
     # Send log through Telegram
     bot.sendMessage(chat_id=CHAT_ID,
