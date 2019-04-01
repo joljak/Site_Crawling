@@ -3,9 +3,12 @@ import os
 import time
 import csv
 import sys
+import telegram
+import json
 
 
 def collect_inven_document_link(idx: int):
+    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} link data")
     session = HTMLSession(mock_browser=True)
 
     if os.path.exists(link_file_name) is False:
@@ -22,7 +25,7 @@ def collect_inven_document_link(idx: int):
                 writer = csv.DictWriter(csv_file, fieldnames=field_names)
                 writer.writerow({'idx': idx, 'link': link.attrs['href']})
         time.sleep(5.0)
-
+    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
 
 def collect_inven_document_content(idx: int, link: str):
     session = HTMLSession(mock_browser=True)
@@ -35,6 +38,7 @@ def collect_inven_document_content(idx: int, link: str):
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow({'idx': idx, 'link': link, 'type': 'title', 'content': content})
     except AttributeError:
+        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Failed to get Title")
         return
 
     ### Post ###
@@ -58,12 +62,18 @@ def collect_inven_document_content(idx: int, link: str):
 
 
 if __name__ == '__main__':
-    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\datafile"))
     if len(sys.argv) < 3:
         print('Argument Error')
         print('Choice Type [link, content] and Input Slang')
         print('usage) python ruliweb.py [Type] [Slang]')
         exit()
+    CRAWLER_NAME = "InvenCrawler"
+    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\..\\datafile"))
+    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\token.json"))
+    with open(os.path.join(TOKEN_FILE)) as token_file:
+        TELEGRAM_BOT_TOKEN = json.load(token_file)['token']
+    bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
+    CHAT_ID = 620483333
 
     TYPE = str(sys.argv[1])
     SLANG = str(sys.argv[2])
@@ -114,9 +124,11 @@ if __name__ == '__main__':
         with open(link_file_name, 'r', encoding='utf-8') as csv_file:
             reader = csv.reader(csv_file)
             next(reader, None)
+            bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} content data")
             for row in reader:
                 if idx == int(row[0]) - 1:
                     collect_inven_document_content(row[0], row[1])
                     idx += 1
+        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Sucessfully collected {SLANG} content data")
     else:
         print("Context Error")
