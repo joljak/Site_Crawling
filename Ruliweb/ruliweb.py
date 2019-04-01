@@ -78,8 +78,8 @@ if __name__ == '__main__':
         exit()
 
     CRAWLER_NAME = "Ruliweb"
-    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\..\\Ruliweb"))
-    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\token.json"))
+    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../Ruliweb"))
+    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "../../token.json"))
 
     # Telegram Setting
     with open(os.path.join(TOKEN_FILE)) as token_file:

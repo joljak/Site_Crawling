@@ -19,7 +19,7 @@ def collect_clien_document_link(num: str):
         for item in r.html.find(
                 '#div_content > div.contents_jirum > div.list_item.symph_row.jirum > .list_title.oneline > .list_subject > a'):
             with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
-                if item.attrs['href'].split('?')[0][-8:] != num:
+                if item.attrs['href'].split('?')[0][-8:] == num:
                     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
                     return
                 writer = csv.DictWriter(link_file, fieldnames=field_names)
@@ -88,8 +88,8 @@ if __name__ == '__main__':
         exit()
 
     CRAWLER_NAME = "Clien"
-    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\..\\Clien"))
-    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\token.json"))
+    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../Clien"))
+    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "../../token.json"))
 
     # Telegram Setting
     with open(os.path.join(TOKEN_FILE)) as token_file:

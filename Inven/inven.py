@@ -59,10 +59,10 @@ if __name__ == '__main__':
         print('usage) python ruliweb.py [Type] [Slang]')
         exit()
     CRAWLER_NAME = "Inven"
-    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\..\\Inven"))
+    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../Inven"))
 
     # Telegram Setting
-    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\token.json"))
+    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "../../token.json"))
     with open(os.path.join(TOKEN_FILE)) as token_file:
         TELEGRAM_BOT_TOKEN = json.load(token_file)['token']
     bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
