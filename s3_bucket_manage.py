@@ -1,12 +1,11 @@
 import json
 import os
 import sys
-
 import boto3
 
-FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
+FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, ".."))
 
-with open(os.path.join(FILE_DIRECTORY, 'slang.json')) as slang_file:
+with open(os.path.join(FILE_DIRECTORY, 'slang.json'), encoding='utf-8') as slang_file:
     # Open slang.json to read slang words
     # TODO: unordered 또는 축약 버전 쓸지 결정 후 확인
     KEYWORD = json.load(slang_file)['unordered']
@@ -40,7 +39,7 @@ if __name__ == '__main__':
     # [upload, download]
     command = sys.argv[1]
     # Site selection
-    # [Dog_drip, FM_korea, Ilbe]
+    # [Dog_drip, FM_korea, Ilbe, Clien, Inven, Ruliweb]
     site = sys.argv[2]
     # Keyword selection
     # keyword in slang.json
@@ -57,16 +56,16 @@ if __name__ == '__main__':
 
     # S3 object to upload or download
     obj = f"{site}_{keyword}_{data_type}.csv"
-    obj_folder = "FM_Korea"
+    obj_folder = site
     s3 = boto3.client('s3')
 
     if command not in ['upload', 'download']:
         print('incorrect command input: command')
         print('[upload, download]')
         exit()
-    if site not in ['Dog_drip', 'FM_korea', 'Ilbe']:
+    if site not in ['Dog_drip', 'FM_korea', 'Ilbe', 'Clien', 'Inven', 'Ruliweb']:
         print('incorrect command input: site')
-        print('[Dog_drip, FM_korea, Ilbe]')
+        print('[Dog_drip, FM_korea, Ilbe, Clien, Inven, Ruliweb]')
         exit()
     if keyword not in KEYWORD:
         print('incorrect command input: keyword')

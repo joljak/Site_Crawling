@@ -5,29 +5,32 @@ import os
 import sys
 import time
 import csv
-import boto3
 import json
 import telegram
 
 
-def collect_clien_document_link(idx: int):
+def collect_clien_document_link(num: str):
     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} link data")
-    num = 100
     session = HTMLSession(mock_browser=True)
-    for page in range(num):
+
+    for page in range(100):
         r = session.get('https://www.clien.net/service/search?q=' + SLANG + '&sort=recency&p=' + str(
             page) + '&boardCd=&isBoard=false')
         for item in r.html.find(
                 '#div_content > div.contents_jirum > div.list_item.symph_row.jirum > .list_title.oneline > .list_subject > a'):
-            idx = idx + 1
-            with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=field_names)
-                writer.writerow({'idx': idx, 'link': 'https://www.clien.net' + item.attrs['href']})
-    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
+            with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
+                if item.attrs['href'].split('?')[0][-8:] != num:
+                    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
+                    return
+                writer = csv.DictWriter(link_file, fieldnames=field_names)
+                writer.writerow(({'num': item.attrs['href'].split('?')[0][-8:], 'link': 'https://www.clien.net' + item.attrs['href']}))
+        time.sleep(3)
+    bot.sendMessage(chat_id=CHAT_ID,
+                    text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
 
 
-def collect_clien_document_content(idx: int, link: str):
-    field_names = ['idx', 'link', 'type', 'content']
+def collect_clien_document_content(num: str, link: str):
+
     session = HTMLSession(mock_browser=True)
     r = session.get(link)
 
@@ -47,17 +50,17 @@ def collect_clien_document_content(idx: int, link: str):
     except AttributeError as e:
         bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: {e}")
         return
-    with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=field_names)
-        writer.writerow({'idx': idx, 'link': link, 'type': 'post', 'content': content})
+    with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
+        writer = csv.DictWriter(content_file, fieldnames=field_names)
+        writer.writerow({'num': num, 'type': 'title', 'content': content})
 
     ### Post ###
-    content = ""
-    for post in r.html.find('#div_content > div.post_view > div.post_content > article > div'):
-        content = content + post.text.replace('\n', ' ').replace('  ', ' ')
-    with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=field_names)
-        writer.writerow({'idx': idx, 'link': link, 'type': 'post', 'content': content})
+    for p in r.html.find('.content_view > div.post_view > div.post_content > article > div', first=True).find('p'):
+        if p.text == '':
+            continue
+        with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
+            writer = csv.DictWriter(content_file, fieldnames=field_names)
+            writer.writerow({'num': num, 'type': 'post', 'content': p.text.replace('\n',' ')})
 
     ### Comment ###
     r = session.get(link.split('?')[0] + '/comment?ps=200')
@@ -68,11 +71,12 @@ def collect_clien_document_content(idx: int, link: str):
         time.sleep(3)
         return
     for comment in comment_content:
-        with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+        if comment.find('.comment_view', first=True).text == '':
+            continue
+        with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
+            writer = csv.DictWriter(content_file, fieldnames=field_names)
             writer.writerow(
-                {'idx': idx, 'link': link, 'type': 'comment',
-                 'content': comment.find('.comment_view', first=True).text.replace('\n', ' ')})
+                {'num': num, 'type': 'comment', 'content': comment.find('.comment_view', first=True).text.replace('\n', '')})
     time.sleep(3)
 
 
@@ -82,74 +86,63 @@ if __name__ == '__main__':
         print('Choice Type [link, content] and Input Slang')
         print('usage) python clien.py [Type] [Slang]')
         exit()
-    CRAWLER_NAME = "ClienCrawler"
-    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\..\\datafile"))
-    SLANG_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\slang.json"))
-    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\token.json"))
-    BUCKET = "dankook-hunminjeongeum-data-bucket"
-    S3 = boto3.client('s3')
 
+    CRAWLER_NAME = "Clien"
+    FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "..\\..\\Clien"))
+    TOKEN_FILE = os.path.abspath(os.path.join(__file__, "..\\..\\token.json"))
+
+    # Telegram Setting
     with open(os.path.join(TOKEN_FILE)) as token_file:
         TELEGRAM_BOT_TOKEN = json.load(token_file)['token']
     bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
     CHAT_ID = 620483333
 
-
     TYPE = str(sys.argv[1])
     SLANG = str(sys.argv[2])
-    link_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_links.csv'
+    link_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_link.csv'
     content_file_name = FILE_DIRECTORY + f'/Clien_{SLANG}_content.csv'
 
     if TYPE == 'link':
-        field_names = ['idx', 'link']
-        if os.path.exists(link_file_name) is False:
-            with open(link_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=field_names)
-                writer.writeheader()
-            idx = 0
+        if os.path.exists(link_file_name) is True:
+            os.remove(link_file_name)
 
-        else:
-            with open(link_file_name, 'r', encoding='utf-8') as csv_file:
-                reader = csv.reader(csv_file)
+        field_names = ['num', 'link']
+
+        if os.path.exists(content_file_name) is True:
+            with open(content_file_name, 'r', encoding='utf-8') as content_file:
+                reader = csv.reader(content_file)
                 next(reader, None)
                 try:
-                    idx = int(list(reader)[-1][0])
+                    num = list(reader)[-1][0]
                 except ValueError:
-                    idx = 0
+                    num = None
                 except IndexError:
-                    idx = 0
-        collect_clien_document_link(idx)
+                    num = None
+        else:
+            num = None
+
+        with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
+            writer = csv.DictWriter(link_file, fieldnames=field_names)
+            writer.writeheader()
+        collect_clien_document_link(num)
 
     elif TYPE == 'content':
-
+        field_names = ['num', 'type', 'content']
         if os.path.exists(link_file_name) is False:
             bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: FileNotFoundError: No such file!")
             exit()
-        if os.path.exists(content_file_name) is False:
-            with open(content_file_name, 'a', encoding='utf-8', newline='\n') as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=['idx', 'link', 'type', 'content'])
-                writer.writeheader()
-                idx = 0
-        else:
-            with open(content_file_name, 'r', encoding='utf-8') as csv_file:
-                reader = csv.reader(csv_file)
-                next(reader, None)
-                try:
-                    idx = int(list(reader)[-1][0])
-                except IndexError:
-                    idx = 0
-                except ValueError:
-                    idx = 0
 
-        with open(link_file_name, 'r', encoding='utf-8') as csv_file:
-            reader = csv.reader(csv_file)
+        if os.path.exists(content_file_name) is False:
+            with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
+                writer = csv.DictWriter(content_file, fieldnames=field_names)
+                writer.writeheader()
+
+        with open(link_file_name, 'r', encoding='utf-8') as link_file:
+            reader = csv.reader(link_file)
             next(reader, None)
             bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} content data")
-            for row in reader:
-                if idx == int(row[0]) - 1:
-                    collect_clien_document_content(row[0], row[1])
-                    idx += 1
+            for row in reversed(list(reader)):
+                collect_clien_document_content(row[0], row[1])
         bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Sucessfully collected {SLANG} content data")
-
     else:
-        print("Context Error")
+        print("Context Error. Please retry input")
