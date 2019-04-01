@@ -30,10 +30,6 @@ def collect_dog_drip_document_link(keyword):
     file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
-    if os.path.exists(file_name):
-        # remove file if exists and make over
-        os.remove(file_name)
-        open(file_name, 'a').close()
 
     if os.path.exists(file_name) is False:
         open(file_name, 'a').close()
@@ -91,7 +87,6 @@ def collect_dog_drip_document_link(keyword):
 
     # Return page number of keyword for logging
     session.close()
-    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     return page_sum
 
 
@@ -114,7 +109,6 @@ def collect_dog_drip_document_content(keyword):
         if len(link_csv.readlines()) == 0:
             print(f'{keyword} link CSV empty! Deleting the file..')
             KEYWORD_NOT_EXIST.append(keyword)
-            os.remove(link_file_name)
             return 0
 
     if os.path.exists(content_file_name) is False:

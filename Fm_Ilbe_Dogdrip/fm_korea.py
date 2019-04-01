@@ -103,7 +103,6 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) {start_page}-{end_page} link Done!\n')
     bar.finish()
-    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     session.close()
 
 

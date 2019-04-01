@@ -126,7 +126,6 @@ def collect_ilbe_document_link(keyword):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'Ilbe {content_type} {keyword}({slang_choice}) link Done!\n')
     bar.finish()
-    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     session.close()
 
 
@@ -149,7 +148,6 @@ def collect_ilbe_document_content(keyword):
         if len(link_csv.readlines()) == 0:
             print(f'{keyword} link CSV empty! Deleting the file..')
             KEYWORD_NOT_EXIST.append(keyword)
-            os.remove(link_file_name)
             return 0
 
     if os.path.exists(content_file_name) is False:
