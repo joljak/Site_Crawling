@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import re
+import random
 import sys
 import time
 
@@ -70,7 +71,7 @@ def collect_ilbe_document_link(keyword):
         for number in range(pages):
             try:
                 # Search link and text result via keyword
-                time.sleep(4)
+                time.sleep(random.randrange(4, 6))
                 bar.next()
 
                 # Make a new session for crawling
@@ -164,6 +165,8 @@ def collect_ilbe_document_content(keyword):
                         text=f"{keyword} keyword link file does not exist. Something went wrong!")
         return 0
     else:
+        bot.sendMessage(chat_id=CHAT_ID,
+                        text=f"{keyword} Row: {row_count}")
         with open(content_file_name, 'a') as content_csv:
             # Write field name on header of CSV
             content_writer = csv.DictWriter(content_csv, fieldnames=field_name)
@@ -198,7 +201,7 @@ def collect_ilbe_document_content(keyword):
                         else:
                             # Write into CSV
                             print(f'Title: {title}')
-                            content_writer.writerow({'link': link, 'content': title.text})
+                            content_writer.writerow({'link': link, 'content': title})
 
                         # Body divided by <br>
                         body = page_result.find(
@@ -234,7 +237,7 @@ def collect_ilbe_document_content(keyword):
                             continue
                         else:
                             for comment in comments:
-                                if "[숨김 또는 삭제된 댓글입니다]" in comment:
+                                if "[숨김 또는 삭제된 댓글입니다]" in comment.text:
                                     print('Empty comment. Skip..')
                                     continue
                                 # TODO: 댓글도 나눠서 넣을 필요 있음.
@@ -248,7 +251,7 @@ def collect_ilbe_document_content(keyword):
                                     print(f'Comment: {comment_content}')
 
                     # Sleep 8 secs for next link
-                    time.sleep(8)
+                    time.sleep(random.randrange(8, 10))
                     # Count on keyword link
                     keyword_page_count += 1
 
