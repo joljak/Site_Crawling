@@ -12,12 +12,14 @@ import telegram
 def collect_clien_document_link(num: str):
     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} link data")
     session = HTMLSession(mock_browser=True)
-
+    print("link function 1")
     for page in range(100):
         r = session.get('https://www.clien.net/service/search?q=' + SLANG + '&sort=recency&p=' + str(
             page) + '&boardCd=&isBoard=false')
+        print(r.html.html)
         for item in r.html.find(
                 '#div_content > div.contents_jirum > div.list_item.symph_row.jirum > .list_title.oneline > .list_subject > a'):
+            print(item)
             with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
                 if item.attrs['href'].split('?')[0][-8:] == num:
                     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
