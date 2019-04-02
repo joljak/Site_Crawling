@@ -198,7 +198,7 @@ def collect_ilbe_document_content(keyword):
                         else:
                             # Write into CSV
                             print(f'Title: {title}')
-                            # content_writer.writerow({'link': link, 'content': title.text})
+                            content_writer.writerow({'link': link, 'content': title.text})
 
                         # Body divided by <br>
                         body = page_result.find(
@@ -221,7 +221,7 @@ def collect_ilbe_document_content(keyword):
                                     continue
                                 else:
                                     print(f'Body: {body}')
-                                    # content_writer.writerow({'link': link, 'content': body.replace("\n", "")})
+                                    content_writer.writerow({'link': link, 'content': body.replace("\n", "")})
 
                         # Comment text
                         comments = page_result.find(
@@ -234,6 +234,9 @@ def collect_ilbe_document_content(keyword):
                             continue
                         else:
                             for comment in comments:
+                                if "[숨김 또는 삭제된 댓글입니다]" in comment:
+                                    print('Empty comment. Skip..')
+                                    continue
                                 # TODO: 댓글도 나눠서 넣을 필요 있음.
                                 # Replace line change into blank
                                 comment_content = comment.text.replace("\n", " ")
@@ -241,7 +244,7 @@ def collect_ilbe_document_content(keyword):
                                     continue
                                 else:
                                     # If the content is not blank
-                                    # content_writer.writerow({'link': link, 'content': comment_content})
+                                    content_writer.writerow({'link': link, 'content': comment_content})
                                     print(f'Comment: {comment_content}')
 
                     # Sleep 8 secs for next link
