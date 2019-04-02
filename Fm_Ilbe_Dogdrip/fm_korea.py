@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import time
+import random
 
 import boto3
 import telegram
@@ -60,7 +61,7 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
     for number in range(start_page, end_page):
         try:
             # Search link and text result via keyword
-            time.sleep(12)
+            time.sleep(random.randrange(12, 18))
             bar.next()
 
             fake_session_page = session.get('https://www.fmkorea.com/')
@@ -195,7 +196,7 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
                         else:
                             # If the content is not blank
                             content_writer.writerow({'link': link, 'content': comment_content})
-                    time.sleep(14)
+                    time.sleep(random.randrange(14, 17))
 
                 # Close session
                 session.close()
