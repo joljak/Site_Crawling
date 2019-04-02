@@ -144,6 +144,7 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
         for line in line_reader:
             # Crawl content data from each link_line
             try:
+                time.sleep(random.randrange(14, 17))
                 bar.next()
                 link = ''.join(line)
 
@@ -196,7 +197,6 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
                         else:
                             # If the content is not blank
                             content_writer.writerow({'link': link, 'content': comment_content})
-                    time.sleep(random.randrange(14, 17))
 
                 # Close session
                 session.close()
