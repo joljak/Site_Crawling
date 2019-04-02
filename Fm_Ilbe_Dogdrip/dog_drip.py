@@ -18,6 +18,7 @@ KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
 OBJ_FOLDER = "FM_Ilbe_Dogdrip"
+
 with open(os.path.join('bucket_name.json')) as slang_file:
     S3_BUCKET = json.load(slang_file)['bucket']
 s3 = boto3.client('s3')
