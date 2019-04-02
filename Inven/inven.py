@@ -42,7 +42,7 @@ def collect_inven_document_content(num: str, link: str):
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow({'num': num, 'type': 'title', 'content': content})
     except AttributeError:
-        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Failed to get Title")
+        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Failed to get Title. link {link}")
         return
     ### Post ###
     for text in r.html.find('#powerbbsContent', first=True).text.split('\n'):
@@ -94,7 +94,12 @@ if __name__ == '__main__':
         with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
             writer = csv.DictWriter(link_file, fieldnames=field_names)
             writer.writeheader()
-        collect_inven_document_link(num)
+        try:
+            collect_inven_document_link(num)
+        except:
+            bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Error! Connection Closed")
+
+
 
     elif TYPE == 'content':
         field_names = ['num', 'type', 'content']
@@ -113,7 +118,10 @@ if __name__ == '__main__':
             next(reader, None)
             bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} content data")
             for row in reversed(list(reader)):
-                collect_inven_document_content(row[0], row[1])
+                try:
+                    collect_inven_document_content(row[0], row[1])
+                except:
+                    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Error! Connection Closed")
         bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} content data.")
     else:
         print("Context Error. Please retry input")

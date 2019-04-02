@@ -20,17 +20,18 @@ def collect_clien_document_link(num: str):
                 '#div_content > div.contents_jirum > div.list_item.symph_row.jirum > .list_title.oneline > .list_subject > a'):
             with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
                 if item.attrs['href'].split('?')[0][-8:] == num:
-                    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
+                    bot.sendMessage(chat_id=CHAT_ID,
+                                    text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
                     return
                 writer = csv.DictWriter(link_file, fieldnames=field_names)
-                writer.writerow(({'num': item.attrs['href'].split('?')[0][-8:], 'link': 'https://www.clien.net' + item.attrs['href']}))
+                writer.writerow(({'num': item.attrs['href'].split('?')[0][-8:],
+                                  'link': 'https://www.clien.net' + item.attrs['href']}))
         time.sleep(3)
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
 
 
 def collect_clien_document_content(num: str, link: str):
-
     session = HTMLSession(mock_browser=True)
     r = session.get(link)
 
@@ -48,7 +49,7 @@ def collect_clien_document_content(num: str, link: str):
     try:
         content = r.html.find('#div_content > div.post_title.symph_row > h3 > span', first=True).text
     except AttributeError as e:
-        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: {e}")
+        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: {e}, {link}")
         return
     with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
         writer = csv.DictWriter(content_file, fieldnames=field_names)
@@ -60,14 +61,14 @@ def collect_clien_document_content(num: str, link: str):
             continue
         with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
             writer = csv.DictWriter(content_file, fieldnames=field_names)
-            writer.writerow({'num': num, 'type': 'post', 'content': p.text.replace('\n',' ')})
+            writer.writerow({'num': num, 'type': 'post', 'content': p.text.replace('\n', ' ')})
 
     ### Comment ###
     r = session.get(link.split('?')[0] + '/comment?ps=200')
     try:
         comment_content = r.html.find('.comment_content')
     except ParserError:
-        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: No Comment")
+        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: No Comment, {link}")
         time.sleep(3)
         return
     for comment in comment_content:
@@ -76,7 +77,8 @@ def collect_clien_document_content(num: str, link: str):
         with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
             writer = csv.DictWriter(content_file, fieldnames=field_names)
             writer.writerow(
-                {'num': num, 'type': 'comment', 'content': comment.find('.comment_view', first=True).text.replace('\n', '')})
+                {'num': num, 'type': 'comment',
+                 'content': comment.find('.comment_view', first=True).text.replace('\n', '')})
     time.sleep(3)
 
 
@@ -124,7 +126,10 @@ if __name__ == '__main__':
         with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
             writer = csv.DictWriter(link_file, fieldnames=field_names)
             writer.writeheader()
-        collect_clien_document_link(num)
+        try:
+            collect_clien_document_link(num)
+        except:
+            bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Error! Connection Closed")
 
     elif TYPE == 'content':
         field_names = ['num', 'type', 'content']
@@ -142,7 +147,10 @@ if __name__ == '__main__':
             next(reader, None)
             bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} content data")
             for row in reversed(list(reader)):
-                collect_clien_document_content(row[0], row[1])
+                try:
+                    collect_clien_document_content(row[0], row[1])
+                except:
+                    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Error! Connection Closed")
         bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Sucessfully collected {SLANG} content data")
     else:
         print("Context Error. Please retry input")

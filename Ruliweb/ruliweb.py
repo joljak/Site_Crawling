@@ -63,7 +63,7 @@ def collect_ruliweb_document_content(num: str, link: str):
 
     ### Comment ###
     for comment in r.html.find('.comment_element.normal > td.comment > div.text_wrapper > span.text'):
-        if comment.text != '\n':
+        if comment.text != '':
             with open(content_file_name, 'a', encoding='utf-8', newline='\n') as contnet_file:
                 writer = csv.DictWriter(contnet_file, fieldnames=field_names)
                 writer.writerow({'num': num, 'type': 'comment', 'content': comment.text.replace('\n', ' ')})
@@ -72,10 +72,12 @@ def collect_ruliweb_document_content(num: str, link: str):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print('Argument Error')
-        print('Choice Type [link, content] and Input Slang')
-        print('usage) python ruliweb.py [Type] [Slang]')
-        exit()
+        exit('''
+               Argument Error
+               Choice Type [link, content] and Input Slang
+               usage) python ruliweb.py [Type] [Slang]
+               usage) exec_crawler.py [Site] [Type]
+               ''')
 
     CRAWLER_NAME = "Ruliweb"
     FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../../Ruliweb"))
@@ -113,8 +115,10 @@ if __name__ == '__main__':
         with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
             writer = csv.DictWriter(link_file, fieldnames=field_names)
             writer.writeheader()
-        collect_ruliweb_document_link(num)
-
+        try:
+            collect_ruliweb_document_link(num)
+        except:
+            bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Error! Connection Closed")
 
     elif TYPE == 'content':
         field_names = ['num', 'type', 'content']
@@ -132,7 +136,10 @@ if __name__ == '__main__':
             next(reader, None)
             bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} content data")
             for row in reversed(list(reader)):
-                collect_ruliweb_document_content(row[0], row[1])
+                try:
+                    collect_ruliweb_document_content(row[0], row[1])
+                except:
+                    bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Error! Connection Closed")
         bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Successfully collected {SLANG} content data.")
     else:
         print("Context Error. Please retry input")
