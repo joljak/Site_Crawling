@@ -21,6 +21,6 @@ if __name__ == '__main__':
     TYPE = sys.argv[2] if sys.argv[2] in ['link', 'content'] else exit("Please. Retry input type")
 
     for keyword in SLANG:
-        subprocess.call(f'python {FILE_DIRECTORY}/{SITE}/{SITE.lower()}.py {TYPE} {keyword}')
+        subprocess.call(f'python {FILE_DIRECTORY}/{SITE}/{SITE.lower()}.py {TYPE} {keyword}', shell = True)
         time.sleep(2)
 

@@ -71,7 +71,7 @@ if __name__ == '__main__':
     TYPE = str(sys.argv[1])
     SLANG = str(sys.argv[2])
     link_file_name = FILE_DIRECTORY + f'/Inven_{SLANG}_link.csv'
-    content_file_name = FILE_DIRECTORY + f'/Inven_{SLANG}_contents.csv'
+    content_file_name = FILE_DIRECTORY + f'/Inven_{SLANG}_content.csv'
 
     if TYPE == 'link':
         if os.path.exists(link_file_name) is True:
