@@ -95,12 +95,13 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
                                 text=f"{keyword}:Page {number + 1} empty. Finishing keyword..")
                 break
 
-            # Close session
-            session.close()
-
         except Exception as e:
             bot.sendMessage(chat_id=CHAT_ID,
                             text=str(e))
+
+    # Close session
+    session.close()
+
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'FM_Korea {content_type} {keyword}({slang_choice}) {start_page}-{end_page} link Done!\n')
     bar.finish()
@@ -198,12 +199,12 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
                             # If the content is not blank
                             content_writer.writerow({'link': link, 'content': comment_content})
 
-                # Close session
-                session.close()
-
             except Exception as e:
                 bot.sendMessage(chat_id=CHAT_ID,
                                 text=str(e))
+
+        # Close session
+        session.close()
         bar.finish()
 
     bot.sendMessage(chat_id=CHAT_ID,
