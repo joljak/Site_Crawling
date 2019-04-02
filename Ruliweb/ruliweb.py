@@ -16,12 +16,17 @@ def collect_ruliweb_document_link(num: str):
     search_pos = ""
     url = 'http://bbs.ruliweb.com/community/board/300143/list?search_type=subject&search_key=' + SLANG + '&page='
 
-    while count < 30:
+    while count < 10:
         time.sleep(3)
         r = session.get(url + str(page) + search_pos)
         notice = len(r.html.find('.table_body.notice'))
 
         if r.html.find('.empty_result', first=True) is None:
+            if page > 10:
+                page = 1
+                search_pos = r.html.find('.search_more > a', first=True).attrs['href'][-20:]
+                count += 1
+                continue
             table_body_list = r.html.find('.table_body')
             page += 1
         else:
