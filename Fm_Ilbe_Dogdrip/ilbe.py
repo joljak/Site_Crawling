@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import re
+import random
 import sys
 import time
 
@@ -19,7 +20,8 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "Ilbe"
+OBJ_FOLDER = "FM_Ilbe_Dogdrip"
+
 with open(os.path.join('bucket_name.json')) as slang_file:
     S3_BUCKET = json.load(slang_file)['bucket']
 
@@ -52,7 +54,7 @@ def collect_ilbe_document_link(keyword):
         # Find pages on result
         result_pages = int(re.sub("[^0-9]", "", result_page_number)) // 10
         print(result_pages)
-        pages = result_pages if result_pages < 1000 else 1000
+        pages = result_pages if result_pages < 500 else 500
 
         print(f'Crawling page: {pages}')
 
@@ -70,7 +72,7 @@ def collect_ilbe_document_link(keyword):
         for number in range(pages):
             try:
                 # Search link and text result via keyword
-                time.sleep(4)
+                time.sleep(random.randrange(4, 6))
                 bar.next()
 
                 # Make a new session for crawling
@@ -126,7 +128,6 @@ def collect_ilbe_document_link(keyword):
     bot.sendMessage(chat_id=CHAT_ID,
                     text=f'Ilbe {content_type} {keyword}({slang_choice}) link Done!\n')
     bar.finish()
-    upload_s3(s3, S3_BUCKET, file_name, '/'.join([OBJ_FOLDER, file_name]))
     session.close()
 
 
@@ -149,7 +150,6 @@ def collect_ilbe_document_content(keyword):
         if len(link_csv.readlines()) == 0:
             print(f'{keyword} link CSV empty! Deleting the file..')
             KEYWORD_NOT_EXIST.append(keyword)
-            os.remove(link_file_name)
             return 0
 
     if os.path.exists(content_file_name) is False:
@@ -166,6 +166,8 @@ def collect_ilbe_document_content(keyword):
                         text=f"{keyword} keyword link file does not exist. Something went wrong!")
         return 0
     else:
+        bot.sendMessage(chat_id=CHAT_ID,
+                        text=f"{keyword} Row: {row_count}")
         with open(content_file_name, 'a') as content_csv:
             # Write field name on header of CSV
             content_writer = csv.DictWriter(content_csv, fieldnames=field_name)
@@ -200,7 +202,7 @@ def collect_ilbe_document_content(keyword):
                         else:
                             # Write into CSV
                             print(f'Title: {title}')
-                            # content_writer.writerow({'link': link, 'content': title.text})
+                            content_writer.writerow({'link': link, 'content': title})
 
                         # Body divided by <br>
                         body = page_result.find(
@@ -223,7 +225,7 @@ def collect_ilbe_document_content(keyword):
                                     continue
                                 else:
                                     print(f'Body: {body}')
-                                    # content_writer.writerow({'link': link, 'content': body.replace("\n", "")})
+                                    content_writer.writerow({'link': link, 'content': body.replace("\n", "")})
 
                         # Comment text
                         comments = page_result.find(
@@ -236,6 +238,9 @@ def collect_ilbe_document_content(keyword):
                             continue
                         else:
                             for comment in comments:
+                                if "[숨김 또는 삭제된 댓글입니다]" in comment.text:
+                                    print('Empty comment. Skip..')
+                                    continue
                                 # TODO: 댓글도 나눠서 넣을 필요 있음.
                                 # Replace line change into blank
                                 comment_content = comment.text.replace("\n", " ")
@@ -243,11 +248,11 @@ def collect_ilbe_document_content(keyword):
                                     continue
                                 else:
                                     # If the content is not blank
-                                    # content_writer.writerow({'link': link, 'content': comment_content})
+                                    content_writer.writerow({'link': link, 'content': comment_content})
                                     print(f'Comment: {comment_content}')
 
                     # Sleep 8 secs for next link
-                    time.sleep(8)
+                    time.sleep(random.randrange(8, 10))
                     # Count on keyword link
                     keyword_page_count += 1
 
@@ -258,7 +263,7 @@ def collect_ilbe_document_content(keyword):
                     bot.sendMessage(chat_id=CHAT_ID,
                                     text=str(e))
 
-    upload_s3(s3, S3_BUCKET, link_file_name, '/'.join([OBJ_FOLDER, link_file_name]))
+    upload_s3(s3, S3_BUCKET, content_file_name, '/'.join([OBJ_FOLDER, content_file_name]))
 
     # Send log through Telegram
     bot.sendMessage(chat_id=CHAT_ID,
