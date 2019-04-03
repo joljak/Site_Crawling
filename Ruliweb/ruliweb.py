@@ -16,7 +16,7 @@ def collect_ruliweb_document_link(num: str):
     search_pos = ""
     url = 'http://bbs.ruliweb.com/community/board/300143/list?search_type=subject&search_key=' + SLANG + '&page='
 
-    while count < 10:
+    while count < 5:
         time.sleep(3)
         r = session.get(url + str(page) + search_pos)
         notice = len(r.html.find('.table_body.notice'))

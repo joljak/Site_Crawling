@@ -12,8 +12,7 @@ import telegram
 def collect_clien_document_link(num: str):
     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} link data")
     session = HTMLSession(mock_browser=True)
-    print("link function 1")
-    for page in range(100):
+    for page in range(50):
         r = session.get('https://www.clien.net/service/search?q=' + SLANG + '&sort=recency&p=' + str(
             page) + '&boardCd=&isBoard=false')
         print(r.html.html)
