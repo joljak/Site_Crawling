@@ -36,14 +36,16 @@ def collect_dog_drip_document_link():
     if os.path.exists(file_name) is False:
         open(file_name, 'a').close()
 
+    # Make a new session for crawling
+    session = HTMLSession(mock_browser=True)
     page_sum = 0
     for number in range(1500):
         try:
+            if number % 200 == 0:
+                session.close()
+                session = HTMLSession(mock_browser=True)
             # Repeat for 5000 pages on each keyword
-            time.sleep(random.randrange(4,6))
-
-            # Make a new session for crawling
-            session = HTMLSession(mock_browser=True)
+            time.sleep(random.randrange(4, 6))
 
             search_page = session.get(f'https://www.dogdrip.net/index.php?mid=dogdrip&page={number + 1}').html
 
@@ -133,14 +135,13 @@ def collect_dog_drip_document_content():
         with open(link_file_name, 'r') as link_csv:
             line_reader = csv.reader(link_csv)
 
+            # Make a new session for crawling
+            session = HTMLSession(mock_browser=True)
             for line in line_reader:
                 # For each line from link CSV
                 try:
                     # Get text from the link
                     link = ''.join(line)
-
-                    # Make a new session for crawling
-                    session = HTMLSession(mock_browser=True)
 
                     page_result = session.get(link).html
 
@@ -210,7 +211,7 @@ def collect_dog_drip_document_content():
                                     print(f'Comment: {comment_content}')
 
                     # Sleep 8 secs for next link
-                    time.sleep(random.randrange(7,9))
+                    time.sleep(random.randrange(10, 17))
                     # Count on keyword link
                     keyword_page_count += 1
 
@@ -223,7 +224,7 @@ def collect_dog_drip_document_content():
 
     # Send log through Telegram
     bot.sendMessage(chat_id=CHAT_ID,
-                    text=f'{keyword} keyword {keyword_page_count} out of {row_count} Done.')
+                    text=f'Dog_drip normal keyword {keyword_page_count} out of {row_count} Done.')
     session.close()
     upload_s3(s3, S3_BUCKET, content_file_name, '/'.join([OBJ_FOLDER, content_file_name]))
     return keyword_page_count
