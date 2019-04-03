@@ -39,7 +39,7 @@ def collect_dog_drip_document_link():
     # Make a new session for crawling
     session = HTMLSession(mock_browser=True)
     page_sum = 0
-    for number in range(1500):
+    for number in range(800):
         try:
             if number % 200 == 0:
                 session.close()
