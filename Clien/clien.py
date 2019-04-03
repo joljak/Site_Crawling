@@ -15,17 +15,15 @@ def collect_clien_document_link(num: str):
     for page in range(50):
         r = session.get('https://www.clien.net/service/search?q=' + SLANG + '&sort=recency&p=' + str(
             page) + '&boardCd=&isBoard=false')
-        print(r.html.html)
         for item in r.html.find(
                 '#div_content > div.contents_jirum > div.list_item.symph_row.jirum > .list_title.oneline > .list_subject > a'):
-            print(item)
             with open(link_file_name, 'a', encoding='utf-8', newline='\n') as link_file:
-                if item.attrs['href'].split('?')[0][-8:] == num:
+                if item.attrs['href'].split('?')[0].split('/')[-1] == num:
                     bot.sendMessage(chat_id=CHAT_ID,
                                     text=f"{CRAWLER_NAME}: Successfully collected {SLANG} link data. Please start to collect content data.")
                     return
                 writer = csv.DictWriter(link_file, fieldnames=field_names)
-                writer.writerow(({'num': item.attrs['href'].split('?')[0][-8:],
+                writer.writerow(({'num': item.attrs['href'].split('?')[0].split('/')[-1],
                                   'link': 'https://www.clien.net' + item.attrs['href']}))
         time.sleep(3)
     bot.sendMessage(chat_id=CHAT_ID,
