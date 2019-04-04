@@ -9,10 +9,10 @@ import json
 
 def collect_inven_document_link(num: str):
     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Start collect {SLANG} link data")
-
     session = HTMLSession(mock_browser=True)
-
-    for page in range(1, 51):
+    r = session.get('http://www.inven.co.kr/search/webzine/article/' + SLANG + '/')
+    max_page = int(r.html.find('.basetext > .pg')[-1].text)
+    for page in range(1, max_page):
         r = session.get('http://www.inven.co.kr/search/webzine/article/' + SLANG + '/' + str(page))
         link_list = r.html.find('.news_list > li > h1 > a')
         for link in link_list:
