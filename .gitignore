@@ -245,6 +245,10 @@ dmypy.json
 ### AWS ###
 # accessKey for AWS
 accessKeys.csv
+accessKeys.json
+
+### bot token ###
+token.json
 
 ### Windows ###
 # Windows thumbnail cache files
@@ -272,4 +276,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/macos,python,windows,pycharm+all
-
