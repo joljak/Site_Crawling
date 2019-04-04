@@ -67,7 +67,7 @@ def collect_clien_document_content(num: str, link: str):
     try:
         comment_content = r.html.find('.comment_content')
     except ParserError:
-        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: No Comment, {link}")
+   #     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: No Comment, {link}")
         time.sleep(3)
         return
     for comment in comment_content:
