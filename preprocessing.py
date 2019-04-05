@@ -8,7 +8,7 @@ import sys
 
 def preprocessing(origin_path: str, processed_path: str):
     if os.path.exists(origin_path) is False:
-        exit("No Such File!!")
+        return
     field_name = ['num', 'type', 'content']
     if os.path.exists(processed_path) is False:
         with open(processed_path, 'w', encoding='utf-8', newline='\n') as processed_file:
@@ -27,7 +27,6 @@ def preprocessing(origin_path: str, processed_path: str):
 if __name__ == '__main__':
     ROOT_DIRECTORY = os.path.abspath(os.path.join(__file__, '..'))
 
-    SITE = ['Inven', 'Clien', 'Ruliweb']
     # Telegram Setting
     TOKEN_FILE = os.path.abspath(os.path.join(ROOT_DIRECTORY, "token.json"))
     with open(os.path.join(TOKEN_FILE)) as token_file:
@@ -38,10 +37,16 @@ if __name__ == '__main__':
     # Keyword Setting
     SLANG_FILE = os.path.abspath(os.path.join(ROOT_DIRECTORY, 'slang.json'))
     with open(SLANG_FILE, 'r', encoding='utf-8') as slang_file:
-        KEYWORD = json.load(slang_file)['unordered']
+        SLANG = json.load(slang_file)['unordered']
 
-    for site in SITE:
-        for keyword in KEYWORD:
-            file_path = os.path.abspath(os.path.join(ROOT_DIRECTORY, site, f'{site}_{keyword}_content.csv'))
-            processed_path = os.path.abspath(os.path.join(ROOT_DIRECTORY, site, f'{site}_{keyword}_processed.csv'))
-            preprocessing(file_path, processed_path)
+    site = sys.argv[1] if sys.argv[1] in ['Inven', 'Clien', 'Ruliweb'] else exit(
+        "Please. Retry input site:['Inven', 'Clien', 'Ruliweb'].")
+    idx = SLANG.index(sys.argv[2]) if len(sys.argv) == 3 and sys.argv[2] in SLANG else 0
+
+    bot.sendMessage(chat_id=CHAT_ID, text=f'{site}: Start Preprocessing')
+    for slang in SLANG[idx:]:
+        file_path = os.path.abspath(os.path.join(ROOT_DIRECTORY, site, f'{site}_{slang}_content.csv'))
+        processed_path = os.path.abspath(os.path.join(ROOT_DIRECTORY, site, f'{site}_{slang}_processed.csv'))
+        preprocessing(file_path, processed_path)
+
+    bot.sendMessage(chat_id=CHAT_ID, text=f'{site}: Compleated to preprocessing')
