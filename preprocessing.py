@@ -8,7 +8,7 @@ import sys
 
 def preprocessing(origin_path: str, processed_path: str):
     if os.path.exists(origin_path) is False:
-        return
+        exit()
     field_name = ['num', 'type', 'content']
     if os.path.exists(processed_path) is False:
         with open(processed_path, 'w', encoding='utf-8', newline='\n') as processed_file:
@@ -18,7 +18,7 @@ def preprocessing(origin_path: str, processed_path: str):
         reader = csv.reader(origin_file)
         next(reader, None)
         for field in list(reader):
-            re_content = re.sub('[,-=+#@!$%^&*()_~><…\[\]:;`\'\"/?\d]', '', ''.join(field[2:]))
+            re_content = re.sub('[,-=+#@!$%^&*()_~><…\[\]:;`\'\"/?\w]', '', ''.join(field[2:]))
             with open(processed_path, 'a', encoding='utf-8', newline='\n') as processed_file:
                 writer = csv.DictWriter(processed_file, fieldnames=field_name)
                 writer.writerow({'num': field[0], 'type': field[1], 'content': re_content})
