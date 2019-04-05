@@ -232,9 +232,8 @@ def collect_ilbe_document_content(keyword):
                             'div.xe_content'
                         )
                         if len(comments) == 0:
-                            # Send Telegram if no comments
-                            bot.sendMessage(chat_id=CHAT_ID,
-                                            text=f'link_id: {link[24:]} comment empty')
+                            # Save log if no comments
+                            print(f'link_id: {link[24:]} comment empty')
                             continue
                         else:
                             for comment in comments:

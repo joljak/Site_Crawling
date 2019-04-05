@@ -194,9 +194,8 @@ def collect_dog_drip_document_content(keyword):
                         comments = page_result.find('div.comment-list > div.comment-item > div.comment-content > '
                                                     'div > div:nth-of-type(2) > div.xe_content')
                         if len(comments) == 0:
-                            # Send Telegram if no comments
-                            bot.sendMessage(chat_id=CHAT_ID,
-                                            text=f'link_id: {link[24:]} comment empty')
+                            # Save log if no comments
+                            print(f'link_id: {link[24:]} comment empty')
                             continue
                         else:
                             for comment in comments:

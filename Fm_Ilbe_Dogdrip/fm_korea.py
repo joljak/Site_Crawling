@@ -186,9 +186,9 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
                     # Comment text
                     comments = page_result.find('ul.fdb_lst_ul > li > div:nth-of-type(2) > div.xe_content')
                     if len(comments) == 0:
-                        # Send Telegram if the content is None
-                        bot.sendMessage(chat_id=CHAT_ID,
-                                        text=f'link_id: {link[24:]} comment empty')
+                        # Save log if the content is None
+                        print(f'link_id: {link[24:]} comment empty')
+                        continue
                     for comment in comments:
                         # Replace line change into blank
                         comment_content = comment.text.replace("\n", " ")
