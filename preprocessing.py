@@ -20,9 +20,10 @@ def preprocessing(origin_path: str, processed_path: str):
         next(reader, None)
         for field in list(reader):
             re_content = re.sub('[,-=+#@!$%^&*()_~><…\[\]:;`\'\"/?a-zA-Z]', '', ''.join(field[2:]))
-            with open(processed_path, 'a', encoding='utf-8', newline='\n') as processed_file:
-                writer = csv.DictWriter(processed_file, fieldnames=field_name)
-                writer.writerow({'num': field[0], 'type': field[1], 'content': re_content})
+            if re_content !="":
+                with open(processed_path, 'a', encoding='utf-8', newline='\n') as processed_file:
+                   writer = csv.DictWriter(processed_file, fieldnames=field_name)
+                   writer.writerow({'num': field[0], 'type': field[1], 'content': re_content})
 
 
 if __name__ == '__main__':
