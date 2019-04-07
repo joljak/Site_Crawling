@@ -42,7 +42,6 @@ def collect_inven_document_content(num: str, link: str):
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow({'num': num, 'type': 'title', 'content': content})
     except AttributeError:
-        bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: Failed to get Title. link {link}")
         return
     ### Post ###
     for text in r.html.find('#powerbbsContent', first=True).text.split('\n'):
