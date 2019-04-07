@@ -2,7 +2,6 @@ import json
 import os
 import csv
 import telegram
-import re
 import sys
 
 csv.field_size_limit(sys.maxsize)
