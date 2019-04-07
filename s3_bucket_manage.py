@@ -14,9 +14,9 @@ if __name__ == '__main__':
     with open(os.path.join(ROOT_DIRECTORY, 'slang.json'), encoding='utf-8') as slang_file:
         SLANG = json.load(slang_file)['unordered']
     s3 = boto3.client('s3')
-    S3_BUCKET = "dankook-hunminjeongeum-data-bucket-test"
+    S3_BUCKET = "dankook-hunminjeongeum-data-bucket"
 
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         exit('''
                 Argument Error
                 Choice Command [upload, download]
