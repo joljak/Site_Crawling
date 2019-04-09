@@ -6,6 +6,7 @@ import re
 import sys
 
 csv.field_size_limit(sys.maxsize)
+hangul = re.compile('[^ \u3131-\u3163\uac00-\ud7a3]+')
 
 def preprocessing(origin_path: str, processed_path: str):
     if os.path.exists(origin_path) is False:
@@ -19,7 +20,7 @@ def preprocessing(origin_path: str, processed_path: str):
         reader = csv.reader(origin_file)
         next(reader, None)
         for field in list(reader):
-            re_content = re.sub('[,-=+#@!$%^&*()_~><…\[\]:;`\'\"/?a-zA-Z]', '', ''.join(field[2:]))
+            re_content = hangul.sub('',''.join(field[2:])).strip()
             if re_content !="":
                 with open(processed_path, 'a', encoding='utf-8', newline='\n') as processed_file:
                    writer = csv.DictWriter(processed_file, fieldnames=field_name)
