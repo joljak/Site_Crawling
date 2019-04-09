@@ -62,7 +62,7 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
     for number in range(start_page, end_page):
         try:
             # Search link and text result via keyword
-            time.sleep(random.randrange(12, 18))
+            time.sleep(random.randrange(14, 19))
             bar.next()
 
             fake_session_page = session.get('https://www.fmkorea.com/')
@@ -146,7 +146,7 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
         for line in line_reader:
             # Crawl content data from each link_line
             try:
-                time.sleep(random.randrange(14, 17))
+                time.sleep(random.randrange(15, 19))
                 bar.next()
                 link = ''.join(line)
 
