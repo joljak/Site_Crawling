@@ -50,6 +50,8 @@ def collect_inven_document_content(num: str, link: str):
                 writer = csv.DictWriter(csv_file, fieldnames=field_names)
                 writer.writerow({'num': num, 'type': 'post', 'content': text})
 
+    time.sleep(3)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
