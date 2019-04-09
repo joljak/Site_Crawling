@@ -7,7 +7,8 @@ import boto3
 def upload_s3(local_path, s3_path):
     s3.upload_file(local_path, S3_BUCKET, s3_path)
 
-
+def download_s3(s3_path, local_path):
+    s3.download_file(S3_BUCKET, s3_path, local_path)
 if __name__ == '__main__':
     ROOT_DIRECTORY = os.path.abspath(os.path.join(__file__, ".."))
 
@@ -33,8 +34,12 @@ if __name__ == '__main__':
     for keyword in SLANG:
         file = f'{site}_{keyword}_{type}.csv'
         local_path = os.path.join(os.path.join(ROOT_DIRECTORY, site), file)
-        if os.path.exists(local_path) is False:
-            continue
+        s3_path = '/'.join([site, type, file])
 
         if command == 'upload':
-            upload_s3(local_path, '/'.join([site, type, file]))
+            if os.path.exists(local_path) is True:
+                upload_s3(local_path, s3_path)
+        elif command =='download':
+            if os.path.exists(local_path) is True:
+                os.remove(local_path)
+            download_s3(s3_path, local_path)
