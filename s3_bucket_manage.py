@@ -22,13 +22,13 @@ if __name__ == '__main__':
                 Argument Error
                 Choice Command [upload, download]
                 Choice Site [Clien, Inven, Ruliweb]
-                Choice Type [content, processed, labeled]
+                Choice Type [link, content, processed, labeled]
                 usage) s3_bucket_manage.py [Command] [Site] [Type]
                 ''')
 
     command = sys.argv[1] if sys.argv[1] in ['upload', 'download'] else exit('Choice [upload, download')
     site = sys.argv[2] if sys.argv[2] in ['Inven', 'Clien', 'Ruliweb'] else exit('Choice [Inven, Clien, Ruliweb]')
-    type = sys.argv[3] if sys.argv[3] in ['content', 'processed', 'labeled'] else exit(
+    type = sys.argv[3] if sys.argv[3] in ['link','content', 'processed', 'labeled'] else exit(
         'Choice [content, processed, labeled')
 
     for keyword in SLANG:
