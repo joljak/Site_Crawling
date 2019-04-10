@@ -54,7 +54,7 @@ def collect_ilbe_document_link(keyword):
         # Find pages on result
         result_pages = int(re.sub("[^0-9]", "", result_page_number)) // 10
         print(result_pages)
-        pages = result_pages if result_pages < 200 else 200
+        pages = result_pages if result_pages < 100 else 100
 
         print(f'Crawling page: {pages}')
 
