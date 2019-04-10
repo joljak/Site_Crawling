@@ -5,12 +5,13 @@ import telegram
 import re
 import sys
 
-csv.field_size_limit(sys.maxsize)
+
+csv.field_size_limit(sys.maxsize) # for linux
 hangul = re.compile('[^ \u3131-\u3163\uac00-\ud7a3]+')
 
 def preprocessing(origin_path: str, processed_path: str):
     if os.path.exists(origin_path) is False:
-        exit(f'{origin_path}: Error. Not exists file')
+        return f'{origin_path}: Error. Not exists file'
     field_name = ['num', 'type', 'content']
     if os.path.exists(processed_path) is False:
         with open(processed_path, 'w', encoding='utf-8', newline='\n') as processed_file:
