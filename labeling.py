@@ -49,6 +49,7 @@ if __name__ == '__main__':
     SLANG_FILE = os.path.abspath(os.path.join(ROOT_DIRECTORY, 'slang.json'))
     with open(SLANG_FILE, 'r', encoding='utf-8') as slang_file:
         SLANG = json.load(slang_file)['unordered']
+
     if len(sys.argv) < 2:
         exit('''
                 Argument Error
@@ -56,6 +57,7 @@ if __name__ == '__main__':
                 Choice Start Point [Slang], but Not Required
                 usage) labeling.py [Site] [SLANG]
                 ''')
+
     site = sys.argv[1] if sys.argv[1] in ['Inven', 'Clien', 'Ruliweb'] else exit(
         "Please. Retry input site:['Inven', 'Clien', 'Ruliweb'].")
     idx = SLANG.index(sys.argv[2]) if len(sys.argv) == 3 and sys.argv[2] in SLANG else 0
