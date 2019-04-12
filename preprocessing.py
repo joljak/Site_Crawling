@@ -7,7 +7,7 @@ import sys
 
 
 csv.field_size_limit(sys.maxsize) # for linux
-hangul = re.compile('[^ \u3131-\u3163\uac00-\ud7a3]+')
+hangul = re.compile('[^ .,\u3131-\u3163\uac00-\ud7a3]+')
 
 def preprocessing(origin_path: str, processed_path: str):
     if os.path.exists(origin_path) is False:
