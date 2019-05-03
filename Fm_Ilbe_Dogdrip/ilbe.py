@@ -50,6 +50,9 @@ def collect_ilbe_document_link(keyword):
         # If the list exists
         result_page_number = result_text.find(
             '#content > div.content_margin > h3 > span', first=True).text
+        if result_page_number is None:
+            bot.sendMessage(chat_id=CHAT_ID,
+                            text=f'Keyword: {keyword} result not found.')
         print(result_page_number)
         # Find pages on result
         result_pages = int(re.sub("[^0-9]", "", result_page_number)) // 10
