@@ -17,7 +17,7 @@ from s3_bucket_manage import upload_s3
 FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Ilbe_Dogdrip"
+OBJ_FOLDER = "fm_korea"
 
 with open(os.path.join('bucket_name.json')) as slang_file:
     S3_BUCKET = json.load(slang_file)['bucket']
@@ -50,7 +50,7 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
     session.close()
 
     # Make csv file to save document link
-    file_name = f'fm_korea/FM_korea_{keyword}_{start_page}-{end_page}_links.csv'
+    file_name = f'links/FM_korea_{keyword}_{start_page}-{end_page}_links.csv'
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
     if os.path.exists(file_name) is False:
@@ -116,8 +116,8 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
     :return:
     """
 
-    link_file_name = f'fm_korea/FM_korea_{keyword}_{start_page}-{end_page}_links.csv'
-    content_file_name = f'fm_korea/FM_korea_{keyword}_contents.csv'
+    link_file_name = f'links/FM_korea_{keyword}_{start_page}-{end_page}_links.csv'
+    content_file_name = f'contents/FM_korea_{keyword}_contents.csv'
     if os.path.exists(link_file_name) is False:
         # Check CSV file exists
         print('No CSV file found! Exiting...')
