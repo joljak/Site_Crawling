@@ -133,7 +133,7 @@ def collect_ilbe_document_link(keyword):
 
 def collect_ilbe_document_content(keyword):
     link_file_name = f'links/ilbe_{keyword}_links.csv'
-    content_file_name = f'contents/Ilbe_{keyword}_contents.csv'
+    content_file_name = f'contents/ilbe_{keyword}_contents.csv'
 
     field_name = ['link', 'content']
 

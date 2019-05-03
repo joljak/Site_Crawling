@@ -50,7 +50,7 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
     session.close()
 
     # Make csv file to save document link
-    file_name = f'links/FM_korea_{keyword}_{start_page}-{end_page}_links.csv'
+    file_name = f'links/fm_korea_{keyword}_{start_page}-{end_page}_links.csv'
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
     if os.path.exists(file_name) is False:
@@ -104,7 +104,7 @@ def collect_fm_korea_document_link(keyword, start_page, end_page):
     session.close()
 
     bot.sendMessage(chat_id=CHAT_ID,
-                    text=f'FM_Korea {content_type} {keyword}({slang_choice}) {start_page}-{end_page} link Done!\n')
+                    text=f'fm_Korea {content_type} {keyword}({slang_choice}) {start_page}-{end_page} link Done!\n')
     bar.finish()
     session.close()
 
@@ -116,8 +116,8 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
     :return:
     """
 
-    link_file_name = f'links/FM_korea_{keyword}_{start_page}-{end_page}_links.csv'
-    content_file_name = f'contents/FM_korea_{keyword}_contents.csv'
+    link_file_name = f'links/fm_korea_{keyword}_{start_page}-{end_page}_links.csv'
+    content_file_name = f'contents/fm_korea_{keyword}_contents.csv'
     if os.path.exists(link_file_name) is False:
         # Check CSV file exists
         print('No CSV file found! Exiting...')
@@ -209,7 +209,7 @@ def collect_fm_korea_document_content(keyword, start_page, end_page):
         bar.finish()
 
     bot.sendMessage(chat_id=CHAT_ID,
-                    text=f'FM_Korea {content_type} {keyword}({slang_choice}) content Done!\n')
+                    text=f'fm_Korea {content_type} {keyword}({slang_choice}) content Done!\n')
     upload_s3(s3, S3_BUCKET, content_file_name, '/'.join([OBJ_FOLDER, content_file_name]))
 
 
@@ -245,7 +245,7 @@ if __name__ == '__main__':
 
     print(f'FM_Korea {content_type} Crawling start!!\n')
     bot.sendMessage(chat_id=CHAT_ID,
-                    text=f'FM_Korea {content_type} {keyword}({slang_choice}) {start_page}-{end_page} Crawling start!!\n')
+                    text=f'fm_Korea {content_type} {keyword}({slang_choice}) {start_page}-{end_page} Crawling start!!\n')
 
     if content_type == 'link':
         collect_fm_korea_document_link(keyword, start_page, end_page)
