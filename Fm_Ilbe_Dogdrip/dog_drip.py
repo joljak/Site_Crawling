@@ -17,7 +17,7 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Ilbe_Dogdrip"
+OBJ_FOLDER = "dog_drip"
 
 with open(os.path.join('bucket_name.json')) as slang_file:
     S3_BUCKET = json.load(slang_file)['bucket']
@@ -28,7 +28,7 @@ s3 = boto3.client('s3')
 # 모든 키워드 한번에 실행
 
 def collect_dog_drip_document_link(keyword):
-    file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
+    file_name = f'links/dog_drip_{keyword}_links.csv'
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
@@ -92,8 +92,8 @@ def collect_dog_drip_document_link(keyword):
 
 
 def collect_dog_drip_document_content(keyword):
-    link_file_name = f'dog_drip/Dog_drip_{keyword}_links.csv'
-    content_file_name = f'dog_drip/Dog_drip_{keyword}_contents.csv'
+    link_file_name = f'links/dog_drip_{keyword}_links.csv'
+    content_file_name = f'contents/dog_drip_{keyword}_contents.csv'
 
     field_name = ['link', 'content']
 

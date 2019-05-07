@@ -20,7 +20,7 @@ FILE_DIRECTORY = os.path.abspath(os.path.join(__file__, "../.."))
 KEYWORD_NOT_EXIST = []
 
 # S3 bucket config
-OBJ_FOLDER = "FM_Ilbe_Dogdrip"
+OBJ_FOLDER = "ilbe"
 
 with open(os.path.join('bucket_name.json')) as slang_file:
     S3_BUCKET = json.load(slang_file)['bucket']
@@ -50,6 +50,9 @@ def collect_ilbe_document_link(keyword):
         # If the list exists
         result_page_number = result_text.find(
             '#content > div.content_margin > h3 > span', first=True).text
+        if result_page_number is None:
+            bot.sendMessage(chat_id=CHAT_ID,
+                            text=f'Keyword: {keyword} result not found.')
         print(result_page_number)
         # Find pages on result
         result_pages = int(re.sub("[^0-9]", "", result_page_number)) // 10
@@ -62,7 +65,7 @@ def collect_ilbe_document_link(keyword):
                         text=f'Keyword: {keyword} Crawling page: {pages}')
 
         # Make csv file to save document link
-        file_name = f'ilbe/Ilbe_{keyword}_links.csv'
+        file_name = f'links/ilbe_{keyword}_links.csv'
 
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
         if os.path.exists(file_name) is False:
@@ -132,8 +135,8 @@ def collect_ilbe_document_link(keyword):
 
 
 def collect_ilbe_document_content(keyword):
-    link_file_name = f'ilbe/Ilbe_{keyword}_links.csv'
-    content_file_name = f'ilbe/Ilbe_{keyword}_contents.csv'
+    link_file_name = f'links/ilbe_{keyword}_links.csv'
+    content_file_name = f'contents/ilbe_{keyword}_contents.csv'
 
     field_name = ['link', 'content']
 
