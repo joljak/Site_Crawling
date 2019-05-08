@@ -17,8 +17,10 @@ def simple_s3_downloader():
         path, filename = s3_object.key.split('/contents/')
         if not os.path.exists(path):
             os.mkdir(path)
+            os.mkdir(path+'/contents/')
+            os.mkdir(path + '/processed/')
         bucket.download_file(s3_object.key, filename)
-        os.rename(filename, f"{s3_object.key.split('/')[0]}/{filename}")
+        os.rename(filename, f"{s3_object.key.split('/')[0]}/contents/{filename}")
         # TODO: 사이트별 디렉토리 생성 및 파일 이동
 
 
