@@ -1,8 +1,12 @@
 #from keras.models import load_model
-from telegram.ext import Updater, Dispatcher, MessageHandler, Filters
+from telegram.ext import Updater, MessageHandler, Filters
 import os
 import json
 import re
+
+from sklearn.externals import joblib
+import pickle
+
 
 # Telegram Setting
 ROOT_DIRECTORY = os.path.abspath(os.path.join(__file__, '..'))
@@ -21,8 +25,7 @@ with open(SLANG_FILE, encoding='utf-8') as slang_file:
 hangul = re.compile('[^ .,\u3131-\u3163\uac00-\ud7a3]+')
 
 # Load Model
-# model = load_model('model_name.h5')
-
+model = joblib.load('model.pkl')
 
 def get_message(bot, update):
     
@@ -38,7 +41,8 @@ def get_message(bot, update):
     re_content = re_content.replace('\"', '')
     
     # Predict  모델 완성 후 주석 해제,  입력
-    # pred  = model.predict_classes(re_content)
+
+    # pred = model.predict(re_content)
     for slang in SLANG:
         if slang in re_content:
             pred = 1
