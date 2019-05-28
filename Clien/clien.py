@@ -1,6 +1,5 @@
 from requests_html import HTMLSession
 from lxml.etree import ParserError
-
 import os
 import sys
 import time
@@ -61,13 +60,11 @@ def collect_clien_document_content(num: str, link: str):
         with open(content_file_name, 'a', encoding='utf-8', newline='\n') as content_file:
             writer = csv.DictWriter(content_file, fieldnames=field_names)
             writer.writerow({'num': num, 'type': 'post', 'content': p.text.replace('\n', ' ')})
-
     ### Comment ###
     r = session.get(link.split('?')[0] + '/comment?ps=200')
     try:
         comment_content = r.html.find('.comment_content')
     except ParserError:
-   #     bot.sendMessage(chat_id=CHAT_ID, text=f"{CRAWLER_NAME}: No Comment, {link}")
         time.sleep(3)
         return
     for comment in comment_content:
